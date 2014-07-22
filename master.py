@@ -56,7 +56,7 @@ class GlobalState:
 	flagged for deletion. Since deletion is not typically a frequent action, the memory
 	overhead may be low. This still needs testing to verify.
 	"""
-	def __init__ (self):
+	def __init__(self):
 		self.chunkHandle = 0
 		self.toDelete = []
 
@@ -80,6 +80,19 @@ class GlobalState:
 			return 1
 		except Exception:
 			return 0
+
+
+
+class Master:
+	"""
+	Master
+	"""
+	__init__(self):
+		pass
+
+
+
+
 
 
 
