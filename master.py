@@ -15,7 +15,7 @@
 ######################################################
 
 
-class FileInfo:
+class File:
 	""" FileInfo class contains the metadata associated with a file.
 
 	fileName: name of the file
@@ -26,10 +26,11 @@ class FileInfo:
 		self.fileName = fileName
 		self.chunks = []
 		self.delete = False
+		# QUESTION: Do we want to store a chunk-chunkoffset mapping in here?
 		
 
 
-class ChunkInfo:
+class Chunk:
 	"""ChunkInfo class contains the metadata associated with a chunk.
 
 	chunkHandle: unique ID of the chunk
@@ -39,6 +40,7 @@ class ChunkInfo:
 	def __init__(self, chunkHandle, chunkserverLocations=[]):
 		self.chunkHandle = chunkHandle
 		self.chunkserverLocations = chunkserverLocations
+		# This is the chunk offset
 		self.length = 0
 
 	#Return the amount of space already used on the chunk
@@ -59,6 +61,7 @@ class GlobalState:
 	def __init__(self):
 		self.chunkHandle = 0
 		self.toDelete = []
+		self.fileMap = {}
 
 	#Increments the chunkHandle and returns the new chunkHandle value
 	def incrementChunkHandle(self):
@@ -88,10 +91,37 @@ class Master:
 	Master
 	"""
 	__init__(self):
-		pass
+		# For now, just make a new global state obj. Later, will need to see if 
+		# one already existed, eg, if an oplog can reconstruct the state
+		self.globalState = GlobalState()
 
 
+	def createFile(self, filename):
+		# Check to see if the filename already exists
+		if self.globalState.fileMap[filename]:
+			print "FILE NAME ALREADY EXISTS"
+			return
 
+		# If we got here, the filename does not already exist so, 
+		# create a new file object to store its metadata and
+		# Add it to the dict of existing files
+		self.globalState.fileMap[filename] = File(filename)
+
+
+	def getUniqueChunkHandle(self):
+		# Starts at 1
+		return self.globalState.incrementChunkHandle()
+
+
+	def linkChunkToFile(self, filename, chunkid):
+		try:
+			fileMeta = self.globalState.fileMap[filename]
+			fileMeta.chunks.append(chunkid)
+
+		# If the file does not exist in the dictionary
+		except:
+			print "FILE NOT FOUND"
+			return 
 
 
 
