@@ -57,11 +57,14 @@ class GlobalState:
 	the memory usage, but decreases the overhead of periodically searching for files
 	flagged for deletion. Since deletion is not typically a frequent action, the memory
 	overhead may be low. This still needs testing to verify.
+	fileMap: key=filename value=file object
+	chunkMap: key=chunkid value=[filename, filename, ...]
 	"""
 	def __init__(self):
 		self.chunkHandle = 0
 		self.toDelete = []
 		self.fileMap = {}
+		self.chunkMap = {}
 
 	#Increments the chunkHandle and returns the new chunkHandle value
 	def incrementChunkHandle(self):
