@@ -44,7 +44,7 @@ class Chunk:
 		self.length = 0
 
 	#Return the amount of space already used on the chunk
-	def length(self):
+	def offset(self):
 		return self.length
 		
 
@@ -97,6 +97,9 @@ class Master:
 		# For now, just make a new global state obj. Later, will need to see if 
 		# one already existed, eg, if an oplog can reconstruct the state
 		self.globalState = GlobalState()
+		# Stores the latest chunk object, since any previous ones will be full.
+		self.currentChunk = Chunk(self.globalState.incrementChunkHandle())
+
 
 
 	def createFile(self, filename):
@@ -111,11 +114,20 @@ class Master:
 		self.globalState.fileMap[filename] = File(filename)
 
 
+
 	def getUniqueChunkHandle(self):
 		# Starts at 1
 		return self.globalState.incrementChunkHandle()
 
 
+
+	def createNewChunk(self):
+		self.currentChunk = Chunk(self.globalState.incrementChunkHandle())
+
+
+
+
+	# see current chunk offset if full new chunk, else append until full
 	def linkChunkToFile(self, filename, chunkid):
 		try:
 			fileMeta = self.globalState.fileMap[filename]
