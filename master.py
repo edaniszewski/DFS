@@ -21,11 +21,13 @@ class File:
 	fileName: name of the file
 	chunks: list of tuples giving chunkHandle and offset
 	delete: flag for Deletion 
+	size: the size of the file
 	"""
 	def __init__(self, fileName):
 		self.fileName = fileName
 		self.chunks = []
 		self.delete = False
+		self.size = None
 		# QUESTION: Do we want to store a chunk-chunkoffset mapping in here?
 		
 
@@ -126,7 +128,6 @@ class Master:
 
 
 
-
 	# see current chunk offset if full new chunk, else append until full
 	def linkChunkToFile(self, filename, chunkid):
 		try:
@@ -140,4 +141,21 @@ class Master:
 
 
 
+	# Returns a list of files currently found in the system
+	def listOfFiles(self):
+		return self.globalState.fileMap.keys()
 
+
+	# When a file is deleted and scrubbed, remove metadata for that file
+	def cleanFileMap(self, fileName):
+		# Don't know if will need this, but get the associated chunks so they can be
+		# unlinked from the file if they need to be elsewhere.
+		assicoatedChunks = self.globalState.fileMap[filename].chunks
+
+		try:
+			self.globalState.toDelete.remove(filename)
+		except:
+			print "file not in todelete list......"
+			return
+
+		del self.globalState.fileMap[filename]
