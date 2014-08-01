@@ -14,6 +14,9 @@
 #
 ######################################################
 
+import config
+
+
 
 class File:
 	""" FileInfo class contains the metadata associated with a file.
@@ -125,6 +128,7 @@ class Master:
 
 	def createNewChunk(self):
 		self.currentChunk = Chunk(self.globalState.incrementChunkHandle())
+		return 1
 
 
 
@@ -159,3 +163,21 @@ class Master:
 			return
 
 		del self.globalState.fileMap[filename]
+
+
+	def append(self, filename, append_length):
+
+		fileObj = self.globalState.fileMap[fileName]
+
+		chunks = fileObj.chunks
+
+		# Only look at the first replica right now, since all replicas should be the same.
+		chunkObj = self.globalState.chunkMap[chunks[0]]
+
+		if ((config.chunkSize - chunkObj.length) < append_length):
+			# The size to append is greater than the size left in the chunk.
+			pass
+
+
+
+
