@@ -71,9 +71,13 @@ class GlobalState:
 		self.fileMap = {}
 		self.chunkMap = {}
 
-	#Increments the chunkHandle and returns the new chunkHandle value
+	#Increments the chunkHandle
 	def incrementChunkHandle(self):
 		self.chunkHandle += 1
+
+	#Increment and get the chunk handle
+	def incrementAndGetChunkHandle(self):
+		self.incrementChunkHandle()
 		return self.chunkHandle
 
 	#Add a file to the tracked list of pending deletions
@@ -121,13 +125,13 @@ class Master:
 
 
 	def getUniqueChunkHandle(self):
-		# Starts at 1
-		return self.globalState.incrementChunkHandle()
+		self.globalState.incrementChunkHandle()
+		return self.globalState.chunkHandle - 1
 
 
 
 	def createNewChunk(self):
-		self.currentChunk = Chunk(self.globalState.incrementChunkHandle())
+		self.currentChunk = Chunk(self.getUniqueChunkHandle())
 		return 1
 
 
