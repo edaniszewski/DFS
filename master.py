@@ -182,6 +182,100 @@ class Master:
 			# The size to append is greater than the size left in the chunk.
 			pass
 
+	# Read from a chunk
+	def read(self, offset):
+		pass
+
+	# Mark a file as deleted
+	def delete(self, fileName):
+		pass
+
+	# Unmark a deleted file
+	def undelete(self, fileName):
+		pass
+
+	# Allocate an append lock
+	def lockAppend(self, chunkHandle):
+		pass
+
+	# Deallocate an append lock
+	def unlockAppend(self, chunkHandle):
+		pass
+
+	# Allocate a read lock
+	def lockRead(self, chunkHandle):
+		pass
+
+	# Deallocate a read lock
+	def unlockRead(self, chunkHandle):
+		pass
+
+	# Check if a chunk has any locks currently active
+	def checkLocks(self, chunkHandle):
+		pass
+
+	# Check if a chunk is empty --  Purpose: if all of the files that once 
+	# belonged to a chunk were deleted, the chunk would not be recycled, so delete
+	# the object instantiaion to free memory.
+	def isChunkEmpty(self, chunkHandle):
+		pass
+
+	# Delete a chunk instance
+	def deleteChunk(self, chunkHandle):
+		pass
+
+	# Return all active chunks
+	def getChunks(self):
+		pass
+
+	# Get a specified chunk
+	def getChunk(self, chunkHandle):
+		pass
+
+	# Get the locations (chunkservers) where the chunk resides
+	def getChunkLocations(self, chunkHanlde):
+		pass
+
+	# Check how many replicas of a chunk exist
+	def numberOfReplicas(self, chunkHandle):
+		pass
+
+	# create a replica of a chunk
+	def replicateChunk(self, chunkHandle):
+		pass
+
+	# Return all file objects
+	def getFiles(self):
+		pass
+
+	# Return all active file names
+	def getFileNames(self):
+		pass
+
+	# Get a specified file object
+	def getFile(self, fileName):
+		pass
+
+	# requests chunkhandles from chunkservers
+	def interrogateChunkServer(self):
+		pass
+
+	# removes chunkserver from active hosts list
+	def markChunkserverInactive(self):
+		pass
+
+	# add chunkserver to active hosts list
+	def markChunkserverActive(self):
+		pass
+
+	# OPLOG should act as centralized master logger - read from it to regain previous state
+	def readOplog(self):
+		pass
+
+	# Append an entry to the OPLOG
+	def appendToOplog(self):
+		pass
+
 
 
 
