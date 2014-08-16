@@ -15,6 +15,7 @@ Created on Aug 13, 2014
 import os.path
 from src.meta.globalstate import GlobalState
 from src import config
+from random import choice
 
 
 
@@ -184,6 +185,38 @@ class Master(object):
         '''
         return len(self.getChunkLocations(chunkHandle))
     
+    
+    def chooseChunkLocations(self, chunkHandle):
+        '''
+        Choose locations for a chunk to be stored. Currently there is no
+        load balancing in place to determine which chunkservers get chunks
+        
+        @param currentLocations: the locations the chunk is currently stored
+        '''
+        #TODO: Implement load balancing
+        
+        currentLocations = self.getChunkLocations(chunkHandle)
+        numOfLocs = self.numberOfReplicas(chunkHandle)
+        # In the case that 3 replicas exist, 
+        if numOfLocs > config.replicaAmount:
+            return
+        else:
+            amntLocNeeded = config.replicaAmount - numOfLocs
+            activeHosts = self.gs.activeHosts
+            newLocations = []
+            
+            # Remove the locations the chunk already occupies
+            for host in currentLocations:
+                activeHosts.remove(host)
+            
+            # Choose new locations for the chunk
+            for num in amntLocNeeded:  # @UnusedVariable
+                loc = choice(activeHosts)
+                newLocations.append(loc)
+                activeHosts.remove(loc)
+                
+            return newLocations
+
     
     def replicateChunk(self):
         pass
