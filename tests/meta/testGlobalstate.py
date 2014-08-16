@@ -10,6 +10,7 @@ from src.meta.chunk import Chunk
 
 
 
+
 class Test(unittest.TestCase):
 
 
@@ -36,10 +37,13 @@ class Test(unittest.TestCase):
         
         
     def testQueueingDelete(self):
+        self.gs.addFile(self.fileName)
+        
         self.assertEqual(0, len(self.gs.toDelete), "check that filemap is initially empty")
         self.assertTrue(self.gs.queueDelete(self.fileName), "check for proper return code")
         self.assertEqual(self.fileName, self.gs.toDelete[0], "check that proper file name is kept")
         self.assertEqual(1, len(self.gs.toDelete), "check that single entry exists")
+        self.assertFalse(self.gs.queueDelete(self.fileName + "1"), "check handling of invalid file name")
         self.assertTrue(self.gs.dequeueDelete(self.fileName), "check for proper return code")
         self.assertEqual(0, len(self.gs.toDelete), "check that filemap is empty")
         self.assertFalse(self.gs.dequeueDelete(self.fileName), "test removing something that is not in the list")

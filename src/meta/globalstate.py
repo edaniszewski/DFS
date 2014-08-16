@@ -3,8 +3,9 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 '''
-from file import File
+from src.meta.file import File
 from src.meta.chunk import Chunk
+
 
 class GlobalState(object):
     '''
@@ -60,11 +61,10 @@ class GlobalState(object):
         '''
         Add a file to the tracked list of pending deletions
         '''
-        try:
+        if filename in self.fileMap.keys():
             self.toDelete.append(filename)
             return 1
-        # TODO: Better exception handling
-        except Exception:
+        else:
             return 0
         
         
