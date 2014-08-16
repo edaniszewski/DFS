@@ -5,6 +5,7 @@ Created on Aug 13, 2014
 '''
 from meta.file import File
 from meta.chunk import Chunk
+from src import config
 
 
 
@@ -16,6 +17,8 @@ class GlobalState(object):
     @var toDelete:    list holding file names of the files that have been flagged for deletion
     @var fileMap:    dictionary with key=(str)filename, value=(File)file object
     @var chunkMap:    dictionary with key=(int)chunkHandle, value(Chunk)chunk object
+    @var hosts:     list of chunkserver IP addresses
+    @var activeHosts:    list of active chunkserver IP addresses
     '''
 
 
@@ -27,6 +30,25 @@ class GlobalState(object):
         self.toDelete = []
         self.fileMap = {}
         self.chunkMap = {}
+        self.hosts = []
+        self.activeHosts = []
+        
+        
+        
+    def refreshHosts(self):
+        '''
+        Refresh the list of host IPs
+        '''
+        with open(config.hosts, 'r') as f:
+            self.hosts = f.read().splitlines()
+    
+    
+    def refreshActiveHosts(self):
+        '''
+        Refresh the list of active host IPs
+        '''
+        with open(config.activehosts, 'r') as f:
+            self.activeHosts = f.read().splitlines()
         
         
     def incrementChunkHandle(self):

@@ -32,7 +32,23 @@ class Master(object):
         '''
         self.gs = GlobalState()
         self.currentChunk = self.gs.addChunk(self.gs.incrementAndGetChunkHandle())
+        self.checkResources()
         self.restoreState()
+        
+        
+        
+    def checkResources(self):
+        if not os.path.isfile(config.hosts):
+            print "HOSTS FILE: {}, not found.\nExiting...".format(config.hosts)
+            exit(-1)
+        
+        if not os.path.isfile(config.activehosts):
+            open(config.activehosts, 'w').close()
+            print "ACTIVE HOSTS FILE not found, creating new active hosts file..."
+            
+        if not os.path.isfile(config.oplog):
+            open(config.oplog, 'w').close()
+            print "OPLOG not found, creating new oplog..."
         
     ##### ---------------------------------------------
     ####    This may be implemented more easily if 
@@ -41,14 +57,9 @@ class Master(object):
     def getState(self):
         try:
             state = None
-            
-            if os.path.isfile(config.oplog):
-                with open(config.oplog, 'r') as f:
-                    state = f.read().splitlines()
-                
-            else:
-                with open(config.oplog, 'w') as f:
-                    f.close()
+
+            with open(config.oplog, 'r') as f:
+                state = f.read().splitlines()
                     
             return state
                     
