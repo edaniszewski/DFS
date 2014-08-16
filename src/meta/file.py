@@ -1,4 +1,7 @@
 '''
+The File class is a data structure used to track and maintain the 
+metadata associated with files within the system.
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski
@@ -14,11 +17,13 @@ class File(object):
     @var size: the size of the file
     '''
 
-
     def __init__(self, fileName):
         '''
         Constructor
         '''
+        #TODO: Would it make sense to hash the filename?
+        #TODO: NAMESPACE implementation - could be as simple as adding a namespace field
+        #TODO: FUTURE FEATURE: password-enabled files
         self.fileName = fileName
         self.chunkHandles = []
         self.delete = False

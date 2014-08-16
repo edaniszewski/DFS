@@ -1,8 +1,7 @@
 '''
-Object definition of Master class, which acts as the system metadata
-administrator and maintainer. In addition to creating and updating metadata
-information, it also (or will also) persist the data to allow for graceful 
-recovery.
+The Master class acts as the system metadata administrator and maintainer. 
+In addition to creating and updating metadatainformation, it also (or will also) 
+persist the data to allow for graceful recovery.
 
 Note that the master does not handle the data associated with a file - only
 the metadata associated with a file (and the chunks any file belongs to). 
@@ -10,13 +9,12 @@ the metadata associated with a file (and the chunks any file belongs to).
 Created on Aug 13, 2014
 
 @author: erickdaniszewski
-@
 '''
 import os.path
-from src.meta.globalstate import GlobalState
-from src import config
 from random import choice
 
+from src import config
+from src.meta.globalstate import GlobalState
 
 
 class Master(object):
@@ -237,6 +235,8 @@ class Master(object):
         pass
     
     
+    
+#FIXME: this is a temporary addition for quick testing until unit tests are written  
 master = Master()
     
 
