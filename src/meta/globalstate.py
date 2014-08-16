@@ -4,6 +4,7 @@ Created on Aug 13, 2014
 @author: erickdaniszewski
 '''
 from file import File
+from src.meta.chunk import Chunk
 
 class GlobalState(object):
     '''
@@ -88,7 +89,6 @@ class GlobalState(object):
         except Exception:
             return 0
         
-    
         
     def getFiles(self):
         '''
@@ -115,13 +115,27 @@ class GlobalState(object):
             
         del self.fileMap[filename]
         
+        
+    def addChunk(self, chunkHandle):
+        '''
+        Add a new chunk object to the chunk map, keyed to the chunk handle
+        '''
+        if chunkHandle not in self.chunkMap.keys():
+            self.chunkMap[chunkHandle] = Chunk(chunkHandle)
+            return 1
+        else:
+            return 0
+        
     
     def getChunk(self, chunkHandle):
         '''
         Get a chunk object corresponding to a chunkHandle
         '''
-        return self.chunkMap[chunkHandle]
-    
+        try:
+            return self.chunkMap[chunkHandle]
+        except Exception:
+            return 0
+        
     
     def getChunks(self):
         '''
