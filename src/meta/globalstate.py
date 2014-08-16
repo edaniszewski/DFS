@@ -3,21 +3,19 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 '''
-from src.meta.file import File
-from src.meta.chunk import Chunk
+from meta.file import File
+from meta.chunk import Chunk
+
 
 
 class GlobalState(object):
     '''
     Contains important global state, including the chunkHandle incrementor
-
-    chunkHandle: unique ID of the chunks
-    toDelete: list to hold filenames of files flagged for deletion. This increases
-    the memory usage, but decreases the overhead of periodically searching for files
-    flagged for deletion. Since deletion is not typically a frequent action, the memory
-    overhead may be low. This still needs testing to verify.
-    fileMap: key=filename value=file object
-    chunkMap: key=chunkid value=[filename, filename, ...]
+    
+    @var chunkHandle:    unique ID tracker for chunks
+    @var toDelete:    list holding file names of the files that have been flagged for deletion
+    @var fileMap:    dictionary with key=(str)filename, value=(File)file object
+    @var chunkMap:    dictionary with key=(int)chunkHandle, value(Chunk)chunk object
     '''
 
 

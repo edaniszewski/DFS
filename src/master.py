@@ -1,17 +1,28 @@
 '''
+Object definition of Master class, which acts as the system metadata
+administrator and maintainer. In addition to creating and updating metadata
+information, it also (or will also) persist the data to allow for graceful 
+recovery.
+
+Note that the master does not handle the data associated with a file - only
+the metadata associated with a file (and the chunks any file belongs to). 
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski
+@
 '''
+import os.path
 from src.meta.globalstate import GlobalState
-from src.meta.chunk import Chunk
-
+from src import config
 
 
 
 class Master(object):
     '''
-    classdocs
+    MASTER - Centralized administrator of system metadata. Initiates a global state to
+    track the adding and updating of Chunks and Files. Includes (or will include) methods
+    to persist global state.
     '''
 
 
@@ -19,24 +30,95 @@ class Master(object):
         '''
         Constructor
         '''
-        self.globalState = GlobalState()
-        self.currentChunk = Chunk(self.globalState.incrementChunkHandle())
+        self.gs = GlobalState()
+        self.currentChunk = self.gs.addChunk(self.gs.incrementAndGetChunkHandle())
+        self.restoreState()
         
-        
-    def createFile(self):
-        pass
+    ##### ---------------------------------------------
+    ####    This may be implemented more easily if 
+    ####    cPickle is used?
+       
+    def getState(self):
+        try:
+            state = None
+            
+            if os.path.isfile(config.oplog):
+                with open(config.oplog, 'r') as f:
+                    state = f.read().splitlines()
+                
+            else:
+                with open(config.oplog, 'w') as f:
+                    f.close()
+                    
+            return state
+                    
+        except IOError as e:
+            print e
+            print "MASTER.restoreState() - IOERROR" 
+            return None   
     
-    def getUniqueChunkHandle(self):
+    def restoreState(self):
+        state = self.getState()
+        
+        if not state == None:
+            pass
+               
+    ####            
+    ##### ---------------------------------------------
+        
+        
+    def updateCurrentChunk(self):
+        '''
+        When a chunk is filled, a new chunk will need to be created and 
+        the current chunk will need to be updated to the newly created chunk 
+        so further appends may continue.
+        '''
         pass
+        
+        
+    def createNewFile(self, fileName):
+        '''
+        On CREATE, master will create instantiate a new metadata File 
+        Object to track the new file.
+        
+        @param fileName: The name of the file to be created
+        '''
+        self.gs.addFile(fileName)
+    
     
     def createNewChunk(self):
-        pass
+        '''
+        On CREATE or APPEND, master will create a new metadata Chunk
+        Object to track the new chunk.
+        '''
+        chunkHandle = self.gs.incrementAndGetChunkHandle()
+        self.gs.addChunk(chunkHandle)
     
-    def linkChunkToFile(self):
-        pass
     
-    def append(self):
-        pass
+    def linkChunkToFile(self, chunkHandle, fileName):
+        '''
+        When a new file is created, it needs to be associated with the
+        chunk(s) that contain its data
+        
+        @param chunkHandle: the unique ID of the chunk
+        @param fileName: the name of the file to be associated with the chunk
+        '''
+        f = self.gs.getFile(fileName)
+        f.chunkHandles.append(chunkHandle)
+    
+    
+    def append(self, fileName, appendSize):
+        '''
+        Retrieves metadata necessary for an append to occur
+        
+        @param fileName: the name of the file being appended to
+        @param appendSize: amount of data (in bytes) to be appended to the chunk
+        '''
+        curChunk = self.currentChunk
+        if curChunk.offset + appendSize < config.chunkSize:
+            self.linkChunkToFile(curChunk.chunkHandle(), fileName)
+        else:
+            print "TMP MSG: can not append -- not enough space in chunk"
     
     def read(self):
         pass
@@ -71,11 +153,26 @@ class Master(object):
     def deleteChunk(self):
         pass
     
-    def getChunkLocations(self):
-        pass
     
-    def numberOfReplicas(self):
-        pass
+    def getChunkLocations(self, chunkHandle):
+        '''
+        Get the current locations that a chunk is stored at
+        
+        @param chunkHandle: the unique ID of the chunk
+        @return: (list) the IP addresses of the chunkservers the chunk is stored on
+        '''
+        return self.gs.chunkMap[chunkHandle].chunkserverLocations
+    
+    
+    def numberOfReplicas(self, chunkHandle):
+        '''
+        Get the current number of replicas of a specified chunk
+        
+        @param chunkHandle: the unique ID of the chunk
+        @return: (int) number of locations chunk is stored at
+        '''
+        return len(self.getChunkLocations(chunkHandle))
+    
     
     def replicateChunk(self):
         pass
@@ -96,5 +193,7 @@ class Master(object):
         pass
     
     
+master = Master()
     
+
     

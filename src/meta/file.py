@@ -7,11 +7,11 @@ Created on Aug 13, 2014
 class File(object):
     '''
     Contains the metadata associated with a file.
-
-    fileName: name of the file
-    chunkHandles: list of chunkHandles
-    delete: flag for Deletion 
-    size: the size of the file
+    
+    @var fileName: name of the file
+    @var chunkHandles: list of chunkHandles of associated chunks
+    @var delete: flag for deletion
+    @var size: the size of the file
     '''
 
 
