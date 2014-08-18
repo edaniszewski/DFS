@@ -15,3 +15,4 @@ chunkstore = "../chunkstore/"
 ## SYSTEM CONSTANTS
 chunkSize = 2**10
 replicaAmount = 3
+port = 9500 # TODO: look in to which port would be best, if it even matters

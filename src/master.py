@@ -13,8 +13,9 @@ Created on Aug 13, 2014
 import os.path
 from random import choice
 
-from src import config
+from src import config, net
 from src.meta.globalstate import GlobalState
+import threading
 
 
 class Master(object):
@@ -34,9 +35,25 @@ class Master(object):
         self.checkResources()
         self.restoreState()
         
+        # TODO: This will be moved out or automated later.
+        self.HOSTNAME = '127.0.0.1'
+        self.startMasterServer()
         
+        
+        
+    def startMasterServer(self):
+        '''
+        Start the server that the master will listen over
+        '''
+        server = net.ThreadedTCPServer((self.HOSTNAME, config.port), net.ThreadedTCPHandler)
+        server_thread = threading.Thread(target=server.serve_forever())
+        server_thread.daemon=True
+        server_thread.start()
         
     def checkResources(self):
+        '''
+        Check to make sure needed resources exist and take action if they do not
+        '''
         if not os.path.isfile(config.hosts):
             print "HOSTS FILE: {}, not found.\nExiting...".format(config.hosts)
             exit(-1)
@@ -237,7 +254,8 @@ class Master(object):
     
     
 #FIXME: this is a temporary addition for quick testing until unit tests are written  
-master = Master()
+if __name__=="__main__":
+    master = Master()
     
 
     
