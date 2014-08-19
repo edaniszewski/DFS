@@ -4,6 +4,7 @@ Created on Aug 13, 2014
 @author: erickdaniszewski
 '''
 import socket
+from src import config
 
 class Client(object):
     '''
@@ -29,7 +30,9 @@ class Client(object):
         finally:
             sock.close()
             
-# For quick testing, for now        
+            
 if __name__=="__main__":
     client = Client()
     
+    for x in range(10):
+        client.client('127.0.0.1', config.port, "message " + str(x))

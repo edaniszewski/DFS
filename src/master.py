@@ -38,8 +38,7 @@ class Master(object):
         # TODO: This will be moved out or automated later.
         self.HOSTNAME = '127.0.0.1'
         self.startMasterServer()
-        
-        
+
         
     def startMasterServer(self):
         '''
