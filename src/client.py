@@ -35,4 +35,4 @@ if __name__=="__main__":
     client = Client()
     
     for x in range(10):
-        client.client('127.0.0.1', config.port, "message " + str(x))
+        client.client('127.0.0.1', config.PORT, "message " + str(x))
