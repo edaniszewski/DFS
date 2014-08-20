@@ -1,6 +1,6 @@
 '''
 The Master class acts as the system metadata administrator and maintainer. 
-In addition to creating and updating metadatainformation, it also (or will also) 
+In addition to creating and updating metadata information, it also (or will also) 
 persist the data to allow for graceful recovery.
 
 Note that the master does not handle the data associated with a file - only
@@ -42,6 +42,7 @@ class Master(net.ThreadedTCPServer):
         #FIXME: This is only the case for initial start up. Need algo to handle the case when the server is reset
         self.currentChunk = self.getCurrentChunk()
         self.startMasterServer()
+        
 
 
     def getCurrentChunk(self):
@@ -99,25 +100,19 @@ class Master(net.ThreadedTCPServer):
         '''
         Load a previously pickled state
         '''
-        with open(config.metasnapshot, 'rb') as f:
-            state = f.read()
+        state = pickle.load(open(config.metasnapshot, 'rb'))
         
-        if state:
-            return pickle.load(state)
-        else:
-            return None
+        if not state:
+            return GlobalState()
+        
+        return state
 
     
     def restoreState(self):
         '''
         Restore the master's global state to a previouly pickled state
         '''
-        state = self.getState()
-        
-        if not state == None:
-            self.gs = self.getState()
-        else:
-            self.gs = GlobalState()
+        self.gs = self.getState()
 
         
     def updateCurrentChunk(self):
