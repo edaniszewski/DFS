@@ -10,6 +10,7 @@ Created on Aug 16, 2014
 oplog = "../resources/OPLOG.log"
 hosts = "../resources/all.hosts"
 activehosts = "../resources/active.hosts"
+metasnapshot = "../resources/meta.snapshot"
 chunkstore = "../chunkstore/"
 
 ## SYSTEM CONSTANTS
