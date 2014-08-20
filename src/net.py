@@ -1,4 +1,8 @@
 '''
+The net module defines the base classes for the networking capability
+of the master server, the chunk server, and other network-related methods 
+used by the system.
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski

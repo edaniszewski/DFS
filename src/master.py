@@ -17,8 +17,13 @@ from src import config, net
 from src.meta.globalstate import GlobalState
 import threading
 
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
-class Master(object):
+
+class Master(net.ThreadedTCPServer):
     '''
     MASTER - Centralized administrator of system metadata. Initiates a global state to
     track the adding and updating of Chunks and Files. Includes (or will include) methods
@@ -30,68 +35,90 @@ class Master(object):
         '''
         Constructor
         '''
-        self.gs = GlobalState()
-        self.currentChunk = self.gs.addChunk(self.gs.incrementAndGetChunkHandle())
+        # Could use super, not sure if it matters here
+        net.ThreadedTCPServer.__init__(self, (config.HOST, config.PORT), net.ThreadedTCPHandler)
         self.checkResources()
         self.restoreState()
-        
-        # TODO: This will be moved out or automated later.
-        self.HOSTNAME = '127.0.0.1'
+        #FIXME: This is only the case for initial start up. Need algo to handle the case when the server is reset
+        self.currentChunk = self.getCurrentChunk()
         self.startMasterServer()
 
+
+    def getCurrentChunk(self):
+        '''
+        Gets the most recent chunk in the system. If initial start up, 
+        it first creates a chunk.
+        
+        @return: Chunk object
+        '''
+        if self.gs.chunkHandle == 0:
+            self.gs.addChunk(self.gs.incrementAndGetChunkHandle())
+        return self.gs.getChunk(self.gs.chunkHandle)
+
+
+    def stateSnapshot(self):
+        '''
+        Take a snapshot of the metadata and persist it to disk
+        '''
+        with open(config.metasnapshot, 'wb') as f:
+            pickle.dump(self.gs, f)
+        
         
     def startMasterServer(self):
         '''
         Start the server that the master will listen over
         '''
-        server = net.ThreadedTCPServer((self.HOSTNAME, config.port), net.ThreadedTCPHandler)
-        server_thread = threading.Thread(target=server.serve_forever())
+        server_thread = threading.Thread(target=self.serve_forever())
         server_thread.daemon=True
         server_thread.start()
+        
         
     def checkResources(self):
         '''
         Check to make sure needed resources exist and take action if they do not
         '''
+        #TODO: Print statements should be logged
         if not os.path.isfile(config.hosts):
             print "HOSTS FILE: {}, not found.\nExiting...".format(config.hosts)
             exit(-1)
         
         if not os.path.isfile(config.activehosts):
             open(config.activehosts, 'w').close()
-            print "ACTIVE HOSTS FILE not found, creating new active hosts file..."
+            print "ACTIVE HOSTS FILE not found. Creating new active hosts file..."
             
         if not os.path.isfile(config.oplog):
             open(config.oplog, 'w').close()
-            print "OPLOG not found, creating new oplog..."
-        
-    ##### ---------------------------------------------
-    ####    This may be implemented more easily if 
-    ####    cPickle is used?
+            print "OPLOG not found. Creating new oplog..."
+            
+        if not os.path.isfile(config.metasnapshot):
+            open(config.metasnapshot, 'w').close()
+            print "Snapshot persistence file not found. Creating new snapshot file..."
+
        
     def getState(self):
-        try:
-            state = None
+        '''
+        Load a previously pickled state
+        '''
+        with open(config.metasnapshot, 'rb') as f:
+            state = f.read()
+        
+        if state:
+            return pickle.load(state)
+        else:
+            return None
 
-            with open(config.oplog, 'r') as f:
-                state = f.read().splitlines()
-                    
-            return state
-                    
-        except IOError as e:
-            print e
-            print "MASTER.restoreState() - IOERROR" 
-            return None   
     
     def restoreState(self):
+        '''
+        Restore the master's global state to a previouly pickled state
+        '''
         state = self.getState()
         
         if not state == None:
-            pass
-               
-    ####            
-    ##### ---------------------------------------------
-        
+            self.gs = self.getState()
+        else:
+            self.gs = GlobalState()
+
         
     def updateCurrentChunk(self):
         '''
