@@ -3,6 +3,7 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 '''
+import config
 
 class Chunk(object):
     '''
@@ -21,6 +22,14 @@ class Chunk(object):
         self.chunkHandle = chunkHandle
         self.chunkserverLocations = chunkserverLocations
         self.offset = 0
-        
-    def getOffset(self):
-        return self.offset
+    
+    def checkRemainingSize(self, sizeToAppend):
+        '''
+        Checks if a given size will fit on the chunk
+        '''
+        if (self.offset + sizeToAppend) > config.chunkSize:
+            return False
+        return True
+            
+            
+            
