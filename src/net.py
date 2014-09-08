@@ -73,7 +73,7 @@ class UDP:
         '''
         Send data over a given socket
         '''
-        sock.sendall(data)
+        sock.sendto(data, (config.heartbeatHost, config.heartbeatPort))
         
         
     def getNewSocketAndSend(self, host, port, data):

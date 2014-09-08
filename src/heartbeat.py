@@ -8,6 +8,7 @@ import threading
 import time
 from src import config
 import net
+from net import UDP
 
 
 class HeartbeatDict(dict):
@@ -18,7 +19,7 @@ class HeartbeatDict(dict):
     
     def __init__(self):
         '''
-        Constructor
+        Constructor initializes the dictionary and creates a thread lock
         '''
         super(HeartbeatDict, self).__init__()
         self._rwLock = threading.Lock()
@@ -26,27 +27,26 @@ class HeartbeatDict(dict):
     # https://docs.python.org/release/2.5.2/ref/sequence-types.html
     def __setitem__(self, key, value):
         '''
-        Add an item to the dictionary, or update an entry if it already exists
+        Add an item to the dictionary, or update an entry if it already exists.
         '''
-        self._rwLock.acquire()
-        super(HeartbeatDict, self).__setitem__(key, value)
-        self._rwLock.release()
+        with self._rwLock:
+            super(HeartbeatDict, self).__setitem__(key, value)
         
-    def getStaleEntries(self):
+    def getEntries(self):
         '''
-        Returns a list of dictionary entries that have a time stamp older than
-        a threshold amount.
+        Returns a two-tuple of lists of dictionary entries. The 0th element in the
+        tuple is a list of all active IPs. The 1st element is a list of IPs that have a 
+        time stamp older than a threshold amount (inactive IPs).
         '''
         #A time limit. Anything less than the time limit is stale, anything greater is still fresh
         staleTime = time.time() - config.heartbeatFreshPeriod
         staleEntries = []
-        self._rwLock.acquire()
-        #TODO: This isn't awful, but could probably be tightened up a little bit.
-        for (ip, time) in self.items():
-            if time < staleTime:
-                staleEntries.append(ip)
-        self._rwLock.release()
-        return staleEntries
+        freshEntries = []
+        with self._rwLock:
+            #TODO: This isn't awful, but could probably be tightened up a little bit.
+            for (ip, time) in self.items():
+                staleEntries.append(ip) if time < staleTime else freshEntries.append(ip)
+        return (freshEntries, staleEntries)
         
         
         
@@ -56,19 +56,29 @@ class HeartbeatListener(threading.Thread):
     with the chunkservers. Update the HeartbeatDict in accordance with the pings received.
     '''
     
-    def __init__(self, goOnEvent):
-        self.goOnEvent = goOnEvent
+    def __init__(self, event):
+        self.event = event
         self.hbdict = HeartbeatDict()
         self.sock = net.UDP.getNewUDPSocketConnection();
         
     def run(self):
-        while True:
+        while self.event.isSet():
             try:
                 data, addr = self.sock.recvfrom(8)
                 if data == "<3":
                     self.hbdict[addr[0]] = time.time()
             except socket.timeout:
                 pass
+            
+            
+class HeartbeatClient():
+    '''
+    A class each chunkserver will instantiate in order to send heartbeat messages to the 
+    HeartbeatListener
+    '''
+    pass
+    
+    
             
             
 def main():
