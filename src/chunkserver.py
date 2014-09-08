@@ -10,6 +10,7 @@ Created on Aug 13, 2014
 '''
 from src import config
 import os
+from heartbeat import HeartbeatClient
 
 class Chunkserver(object):
     '''
@@ -24,7 +25,14 @@ class Chunkserver(object):
         Constructor
         '''
         self.checkChunkstore()
+        self.heartbeat = HeartbeatClient()
         
+        
+    def heartbeat(self):
+        '''
+        Broadcast a heartbeat message
+        '''
+        self.heartbeat.ping_forever()
         
         
     def checkChunkstore(self):

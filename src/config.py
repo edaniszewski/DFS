@@ -23,3 +23,4 @@ heartbeatFreshPeriod = 15
 heartbeatTimeout = 10
 heartbeatPort = 9550
 heartbeatHost = '127.0.0.1'
+beatPeriod = 5

@@ -11,6 +11,7 @@ import net
 from net import UDP
 
 
+
 class HeartbeatDict(dict):
     '''
     A dictionary class used to track and manage the active system servers,
@@ -55,7 +56,6 @@ class HeartbeatListener(threading.Thread):
     Listen for heart beat pings from HeartbeatClient classes, which are to be instantiated
     with the chunkservers. Update the HeartbeatDict in accordance with the pings received.
     '''
-    
     def __init__(self, event):
         self.event = event
         self.hbdict = HeartbeatDict()
@@ -71,12 +71,30 @@ class HeartbeatListener(threading.Thread):
                 pass
             
             
-class HeartbeatClient():
+class HeartbeatClient(UDP):
     '''
     A class each chunkserver will instantiate in order to send heartbeat messages to the 
     HeartbeatListener
     '''
-    pass
+    def __init__(self):
+        self.msg = "<3"
+    
+    
+    def ping(self):
+        '''
+        Ping the heartbeat listener
+        '''
+        sock = self.getNewUDPSocketConnection()
+        self.send(sock, self.msg)
+        
+        
+    def ping_forever(self):
+        """
+        Pings out to the heartbeat listener forever
+        """
+        while True:
+            self.ping()
+            time.sleep(config.beatPeriod)
     
     
             
