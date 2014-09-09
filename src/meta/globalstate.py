@@ -5,7 +5,7 @@ Created on Aug 13, 2014
 '''
 from meta.file import File
 from meta.chunk import Chunk
-from src import config
+import config
 
 
 

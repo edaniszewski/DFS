@@ -6,7 +6,7 @@ Created on Aug 13, 2014
 import socket
 import threading
 import time
-from src import config
+import config
 import net
 from net import UDP
 

@@ -4,7 +4,7 @@ Created on Aug 13, 2014
 @author: erickdaniszewski
 '''
 import socket
-from src import config
+import config
 
 class Client(object):
     '''

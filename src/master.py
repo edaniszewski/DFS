@@ -13,8 +13,8 @@ Created on Aug 13, 2014
 import os.path
 from random import choice
 
-from src import config, net
-from src.meta.globalstate import GlobalState
+import config, net
+from meta.globalstate import GlobalState
 import threading
 
 try:
