@@ -11,7 +11,7 @@ import net
 from net import UDP
 
 
-
+#TODO: Need a way to persist this dict?
 class HeartbeatDict(dict):
     '''
     A dictionary class used to track and manage the active system servers,
@@ -24,6 +24,7 @@ class HeartbeatDict(dict):
         '''
         super(HeartbeatDict, self).__init__()
         self._rwLock = threading.Lock()
+        self.activeHosts = []
         
     # https://docs.python.org/release/2.5.2/ref/sequence-types.html
     def __setitem__(self, key, value):
@@ -41,13 +42,28 @@ class HeartbeatDict(dict):
         '''
         #A time limit. Anything less than the time limit is stale, anything greater is still fresh
         staleTime = time.time() - config.heartbeatFreshPeriod
-        staleEntries = []
-        freshEntries = []
+        staleEntries, freshEntries = [], []
         with self._rwLock:
             #TODO: This isn't awful, but could probably be tightened up a little bit.
             for (ip, time) in self.items():
                 staleEntries.append(ip) if time < staleTime else freshEntries.append(ip)
         return (freshEntries, staleEntries)
+    
+    
+    def updateActiveHosts(self):
+        '''
+        Update the list of active hosts within the system. First, remove any hosts that are stale, 
+        then add any new hosts to activehosts. 
+        '''
+        results = self.getEntries()
+        
+        for staleEntry in results[1]:
+            if staleEntry in self.activeHosts:
+                self.activeHosts.remove(staleEntry)
+                
+        self.activeHosts = set(self.activeHosts.extend(results[0]))
+        
+        
         
         
         
