@@ -76,13 +76,15 @@ class Master(net.ThreadedTCPServer):
         
     def checkResources(self):
         '''
-        Check to make sure needed resources exist and take action if they do not
-        '''
-        #TODO: Print statements should be logged
-        if not os.path.isfile(config.hosts):
-            print "HOSTS FILE: {}, not found.\nExiting...".format(config.hosts)
-            exit(-1)
+        Check to see if persisted resources exist from previous server instantiations. 
+        If the resources do not exist, create them. The resources which are checked are:
         
+            TODO: Active hosts file may not be needed. May be replaced w/ snapshot depending on how heartbeat will work
+            - active hosts file: persisted list of hosts
+            - oplog file: persisted log of operations executed
+            - metadata snapshot: a snapshot of the global metadata
+        '''
+        #TODO: Print statements should be logged        
         if not os.path.isfile(config.activehosts):
             open(config.activehosts, 'w').close()
             print "ACTIVE HOSTS FILE not found. Creating new active hosts file..."
@@ -96,23 +98,25 @@ class Master(net.ThreadedTCPServer):
             print "Snapshot persistence file not found. Creating new snapshot file..."
 
        
-    def getState(self):
+    def loadGlobalState(self):
         '''
-        Load a previously pickled state
+        Load in a pickled gloabal state (from meta.snapshot resource)
         '''
         state = pickle.load(open(config.metasnapshot, 'rb'))
-        
+        # If nothing was loaded in, create a new instance of GlobalState
         if not state:
             return GlobalState()
-        
+        # Otherwise, return the loaded state
         return state
 
     
     def restoreState(self):
         '''
-        Restore the master's global state to a previouly pickled state
+        Restore the master's global state to a previously pickled state. If loading in a 
+        pickled state was unsuccessful or there was no pickled snapshot to load in, restoreState()
+        will instantiate a new instance of GlobalState.
         '''
-        self.gs = self.getState()
+        self.gs = self.loadGlobalState()
 
         
     def updateCurrentChunk(self):
@@ -126,8 +130,7 @@ class Master(net.ThreadedTCPServer):
         
     def createNewFile(self, fileName):
         '''
-        On CREATE, master will create instantiate a new metadata File 
-        Object to track the new file.
+        Instantiate a new File object
         
         @param fileName: The name of the file to be created
         '''
@@ -232,14 +235,14 @@ class Master(net.ThreadedTCPServer):
         Choose locations for a chunk to be stored. Currently there is no
         load balancing in place to determine which chunkservers get chunks
         
-        @param currentLocations: the locations the chunk is currently stored
+        @param chunkHandle: the handle of the chunk to get locations for
         '''
         #TODO: Implement load balancing
         
         currentLocations = self.getChunkLocations(chunkHandle)
         numOfLocs = self.numberOfReplicas(chunkHandle)
-        # In the case that 3 replicas exist, 
-        if numOfLocs > config.replicaAmount:
+        # In the case that an appropriate number of replicas exist, 
+        if numOfLocs >= config.replicaAmount:
             return
         else:
             amntLocNeeded = config.replicaAmount - numOfLocs
@@ -259,7 +262,7 @@ class Master(net.ThreadedTCPServer):
             return newLocations
 
     
-    def replicateChunk(self):
+    def replicateChunk(self):        
         pass
     
     

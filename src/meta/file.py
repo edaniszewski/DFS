@@ -1,5 +1,5 @@
 '''
-The File class is a data structure used to track and maintain the 
+The File class is an object used to track and maintain the 
 metadata associated with files within the system.
 
 Created on Aug 13, 2014
@@ -21,11 +21,12 @@ class File(object):
         '''
         Constructor
         '''
-        #TODO: Would it make sense to hash the filename?
-        #TODO: NAMESPACE implementation - could be as simple as adding a namespace field
+        #TODO: NAMESPACE implementation 
         #TODO: FUTURE FEATURE: password-enabled files
         self.fileName = fileName
         self.chunkHandles = []
         self.delete = False
         self.size = None
+        self.namespace = None
+        self._password = None
         
