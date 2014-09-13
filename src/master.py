@@ -195,11 +195,16 @@ class Master(net.ThreadedTCPServer):
     def isReadLocked(self):
         pass
     
-    def isChunkEmpty(self):
-        pass
-    
     def deleteChunk(self):
         pass
+    
+    def isChunkEmpty(self, chunk):
+        """
+        Check if a given chunk contains any data
+        """
+        if chunk.offset() == 0:
+            return True
+        return False
     
     
     def getChunkLocations(self, chunkHandle):
@@ -255,21 +260,6 @@ class Master(net.ThreadedTCPServer):
 
     
     def replicateChunk(self):
-        pass
-    
-    def interrogateChunkserver(self):
-        pass
-    
-    def markChunkserverInactive(self):
-        pass
-    
-    def markChunkserverActive(self):
-        pass
-    
-    def oplogRead(self):
-        pass
-    
-    def oplogAppend(self):
         pass
     
     
