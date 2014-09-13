@@ -1,5 +1,5 @@
 '''
-The system configuration options
+System configuration options
 
 Created on Aug 16, 2014
 

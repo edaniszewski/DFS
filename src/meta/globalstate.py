@@ -1,4 +1,14 @@
 '''
+The global state object is the primary metadata storage object used by
+the Master to maintain system state across all chunkservers.
+
+Global state includes:
+    - Mappings from file names to file objects
+    - Mappings from chunk handles to chunk objects
+    - A global chunk handle incrementor to provide unique chunkhandles
+    - List of files marked for deletion
+    - List of active chunk servers
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski

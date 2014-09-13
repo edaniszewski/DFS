@@ -1,4 +1,7 @@
 '''
+The Chunk class is an object used to track and maintain the metadata
+associated with a chunk.
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski

@@ -1,4 +1,14 @@
 '''
+The heartbeat is a means of detecting and tracking the servers that make up the
+system. When a server joins the system, it will ping the heartbeat listener, which 
+adds the server to a dictionary which takes the server ip as key and the time at which
+the ping was received as the value. Correctly operating servers are expected to ping
+the heartbeat listener periodically, so a lapse in response over some threshold value
+will mark that ip as inactive.
+
+The server states tracked by the heartbeat module are used by the Master to delegate 
+chunks and files to servers and maintaining a minimum number of replications on active servers.
+
 Created on Aug 13, 2014
 
 @author: erickdaniszewski
