@@ -8,7 +8,7 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 '''
-from src import config
+import config
 import os
 from heartbeat import HeartbeatClient
 
@@ -24,7 +24,7 @@ class Chunkserver(object):
         '''
         Constructor
         '''
-        self.checkChunkstore()
+        self.check_chunkstore()
         self.heartbeat = HeartbeatClient()
         
         
@@ -35,7 +35,7 @@ class Chunkserver(object):
         self.heartbeat.ping_forever()
         
         
-    def checkChunkstore(self):
+    def check_chunkstore(self):
         '''
         Create the chunkstore directory if it does not yet exist
         '''
@@ -43,7 +43,7 @@ class Chunkserver(object):
             os.mkdir(config.chunkstore)
             
     
-    def createChunk(self, chunkHandle):
+    def create_chunk(self, chunkHandle):
         '''
         Create a file that will be the chunk
         
@@ -52,15 +52,15 @@ class Chunkserver(object):
         open(config.chunkstore + str(chunkHandle), 'w').close()
 
 
-    def appendChunk(self):
+    def append_chunk(self):
         pass
 
 
-    def readChunk(self):
+    def read_chunk(self):
         pass
 
 
-    def deleteChunk(self, chunkHandle):
+    def delete_chunk(self, chunkHandle):
         '''
         Deletes a chunk from the chunkstore
         

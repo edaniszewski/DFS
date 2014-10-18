@@ -26,7 +26,7 @@ class Chunk(object):
         self.chunkserverLocations = chunkserverLocations
         self.offset = 0
     
-    def checkRemainingSize(self, sizeToAppend):
+    def check_remaining_size(self, sizeToAppend):
         '''
         Checks if a given size will fit on the chunk
         '''

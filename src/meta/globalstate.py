@@ -45,7 +45,7 @@ class GlobalState(object):
         
         
         
-    def refreshHosts(self):
+    def refresh_hosts(self):
         '''
         Refresh the list of host IPs
         '''
@@ -53,7 +53,7 @@ class GlobalState(object):
             self.hosts = f.read().splitlines()
     
     
-    def refreshActiveHosts(self):
+    def refresh_active_hosts(self):
         '''
         Refresh the list of active host IPs
         '''
@@ -61,22 +61,22 @@ class GlobalState(object):
             self.activeHosts = f.read().splitlines()
         
         
-    def incrementChunkHandle(self):
+    def increment_chunk_handle(self):
         '''
         Increments the chunk handle.
         '''
         self.chunkHandle += 1
         
         
-    def incrementAndGetChunkHandle(self):
+    def increment_and_get_chunk_handle(self):
         '''
         Increment the chunk handle and return the new chunk handle
         '''
-        self.incrementChunkHandle()
+        self.increment_chunk_handle()
         return self.chunkHandle
     
     
-    def addFile(self, filename):
+    def add_file(self, filename):
         '''
         Add a new file object to the file map, keyed to the file name
         '''
@@ -87,7 +87,7 @@ class GlobalState(object):
             return 0
     
     
-    def queueDelete(self, filename):
+    def queue_delete(self, filename):
         '''
         Add a file to the tracked list of pending deletions
         '''
@@ -98,7 +98,7 @@ class GlobalState(object):
             return 0
         
         
-    def dequeueDelete(self, filename):
+    def dequeue_delete(self, filename):
         '''
         Remove a file from the tracked list of pending deletions
         '''
@@ -110,7 +110,7 @@ class GlobalState(object):
             return 0
         
         
-    def getFile(self, filename):
+    def get_file(self, filename):
         '''
         Get a file object corresponding to a filename string
         '''
@@ -120,33 +120,33 @@ class GlobalState(object):
             return 0
         
         
-    def getFiles(self):
+    def get_files(self):
         '''
         Get a list of all file objects in the system
         '''
         return self.fileMap.values()
     
     
-    def getFileNames(self):
+    def get_file_names(self):
         '''
         Get a list of all file names currently used in the system
         '''
         return self.fileMap.keys()
     
     
-    def cleanFileMap(self, filename):
+    def clean_file_map(self, filename):
         '''
         When a file is deleted, clean the map and remove its metadata footprint
         '''
         associatedChunks = self.fileMap[filename].chunkHandles
         
         for chunkHandle in associatedChunks:
-            self.cleanChunkMap(chunkHandle)
+            self.clean_chunk_map(chunkHandle)
             
         del self.fileMap[filename]
         
         
-    def addChunk(self, chunkHandle):
+    def add_chunk(self, chunkHandle):
         '''
         Add a new chunk object to the chunk map, keyed to the chunk handle
         '''
@@ -157,7 +157,7 @@ class GlobalState(object):
             return 0
         
     
-    def getChunk(self, chunkHandle):
+    def get_chunk(self, chunkHandle):
         '''
         Get a chunk object corresponding to a chunkHandle
         '''
@@ -167,26 +167,29 @@ class GlobalState(object):
             return 0
         
     
-    def getChunks(self):
+    def get_chunks(self):
         '''
         Get a list of all chunk objects in the system
         '''
         return self.chunkMap.values()
     
     
-    def getChunkIDs(self):
+    def get_chunk_ids(self):
         '''
         Get a list of all the chunkHandles currently used in the system
         '''
         return self.chunkMap.keys()
     
     
-    def cleanChunkMap(self, chunkHandle):
+    def clean_chunk_map(self, chunkHandle):
         '''
         When a file is deleted, its chunks must be deleted. Cleans the map and
         removes its metadata footprint
         '''
-        del self.chunkMap[chunkHandle]
+        try:
+            del self.chunkMap[chunkHandle]
+        except Exception:
+            raise RuntimeError('Unable to delete chunk handle from map.')
     
     
     

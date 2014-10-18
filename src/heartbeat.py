@@ -44,7 +44,7 @@ class HeartbeatDict(dict):
         with self._rwLock:
             super(HeartbeatDict, self).__setitem__(key, value)
         
-    def getEntries(self):
+    def get_entries(self):
         '''
         Returns a two-tuple of lists of dictionary entries. The 0th element in the
         tuple is a list of all active IPs. The 1st element is a list of IPs that have a 
@@ -60,12 +60,12 @@ class HeartbeatDict(dict):
         return (freshEntries, staleEntries)
     
     
-    def updateActiveHosts(self):
+    def update_active_hosts(self):
         '''
         Update the list of active hosts within the system. First, remove any hosts that are stale, 
         then add any new hosts to activehosts. 
         '''
-        results = self.getEntries()
+        results = self.get_entries()
         
         for staleEntry in results[1]:
             if staleEntry in self.activeHosts:
@@ -85,7 +85,7 @@ class HeartbeatListener(threading.Thread):
     def __init__(self, event):
         self.event = event
         self.hbdict = HeartbeatDict()
-        self.sock = net.UDP.getNewUDPSocketConnection();
+        self.sock = net.UDP.get_new_udp_socket_connection();
         
     def run(self):
         while self.event.isSet():
@@ -110,7 +110,7 @@ class HeartbeatClient(UDP):
         '''
         Ping the heartbeat listener
         '''
-        sock = self.getNewUDPSocketConnection()
+        sock = self.get_new_udp_socket_connection()
         self.send(sock, self.msg)
         
         

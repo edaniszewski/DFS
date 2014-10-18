@@ -37,15 +37,15 @@ class Master(net.ThreadedTCPServer):
         '''
         # Could use super, not sure if it matters here
         net.ThreadedTCPServer.__init__(self, (config.HOST, config.PORT), net.ThreadedTCPHandler)
-        self.checkResources()
-        self.restoreState()
+        self.check_resources()
+        self.restore_state()
         #FIXME: This is only the case for initial start up. Need algo to handle the case when the server is reset
-        self.currentChunk = self.getCurrentChunk()
-        self.startMasterServer()
+        self.currentChunk = self.get_current_chunk()
+        self.start_master_server()
         
 
 
-    def getCurrentChunk(self):
+    def get_current_chunk(self):
         '''
         Gets the most recent chunk in the system. If initial start up, 
         it first creates a chunk.
@@ -57,7 +57,7 @@ class Master(net.ThreadedTCPServer):
         return self.gs.getChunk(self.gs.chunkHandle)
 
 
-    def stateSnapshot(self):
+    def state_snapshot(self):
         '''
         Take a snapshot of the metadata and persist it to disk
         '''
@@ -65,7 +65,7 @@ class Master(net.ThreadedTCPServer):
             pickle.dump(self.gs, f)
         
         
-    def startMasterServer(self):
+    def start_master_server(self):
         '''
         Start the server that the master will listen over
         '''
@@ -74,7 +74,7 @@ class Master(net.ThreadedTCPServer):
         server_thread.start()
         
         
-    def checkResources(self):
+    def check_resources(self):
         '''
         Check to see if persisted resources exist from previous server instantiations. 
         If the resources do not exist, create them. The resources which are checked are:
@@ -98,7 +98,7 @@ class Master(net.ThreadedTCPServer):
             print "Snapshot persistence file not found. Creating new snapshot file..."
 
        
-    def loadGlobalState(self):
+    def load_global_state(self):
         '''
         Load in a pickled gloabal state (from meta.snapshot resource)
         '''
@@ -110,16 +110,16 @@ class Master(net.ThreadedTCPServer):
         return state
 
     
-    def restoreState(self):
+    def restore_state(self):
         '''
         Restore the master's global state to a previously pickled state. If loading in a 
-        pickled state was unsuccessful or there was no pickled snapshot to load in, restoreState()
+        pickled state was unsuccessful or there was no pickled snapshot to load in, restore_state()
         will instantiate a new instance of GlobalState.
         '''
-        self.gs = self.loadGlobalState()
+        self.gs = self.load_global_state()
 
         
-    def updateCurrentChunk(self):
+    def update_current_chunk(self):
         '''
         When a chunk is filled, a new chunk will need to be created and 
         the current chunk will need to be updated to the newly created chunk 
@@ -128,7 +128,7 @@ class Master(net.ThreadedTCPServer):
         pass
         
         
-    def createNewFile(self, fileName):
+    def create_new_file(self, fileName):
         '''
         Instantiate a new File object
         
@@ -137,7 +137,7 @@ class Master(net.ThreadedTCPServer):
         self.gs.addFile(fileName)
     
     
-    def createNewChunk(self):
+    def create_new_chunk(self):
         '''
         On CREATE or APPEND, master will create a new metadata Chunk
         Object to track the new chunk.
@@ -146,7 +146,7 @@ class Master(net.ThreadedTCPServer):
         self.gs.addChunk(chunkHandle)
     
     
-    def linkChunkToFile(self, chunkHandle, fileName):
+    def link_chunk_to_file(self, chunkHandle, fileName):
         '''
         When a new file is created, it needs to be associated with the
         chunk(s) that contain its data
@@ -167,7 +167,7 @@ class Master(net.ThreadedTCPServer):
         '''
         curChunk = self.currentChunk
         if curChunk.offset + appendSize < config.chunkSize:
-            self.linkChunkToFile(curChunk.chunkHandle(), fileName)
+            self.link_chunk_to_file(curChunk.chunkHandle(), fileName)
         else:
             print "TMP MSG: can not append -- not enough space in chunk"
     
@@ -180,28 +180,28 @@ class Master(net.ThreadedTCPServer):
     def undelete(self):
         pass
     
-    def appendLock(self):
+    def append_lock(self):
         pass
     
-    def appendUnlock(self):
+    def append_unlock(self):
         pass
     
-    def readLock(self):
+    def read_lock(self):
         pass
     
-    def readUnlock(self):
+    def read_unlock(self):
         pass
     
-    def isAppendLocked(self):
+    def is_append_locked(self):
         pass
     
-    def isReadLocked(self):
+    def is_read_locked(self):
         pass
     
-    def deleteChunk(self):
+    def delete_chunk(self):
         pass
     
-    def isChunkEmpty(self, chunk):
+    def is_chunk_empty(self, chunk):
         """
         Check if a given chunk contains any data
         """
@@ -210,7 +210,7 @@ class Master(net.ThreadedTCPServer):
         return False
     
     
-    def getChunkLocations(self, chunkHandle):
+    def get_chunk_locations(self, chunkHandle):
         '''
         Get the current locations that a chunk is stored at
         
@@ -220,17 +220,17 @@ class Master(net.ThreadedTCPServer):
         return self.gs.chunkMap[chunkHandle].chunkserverLocations
     
     
-    def numberOfReplicas(self, chunkHandle):
+    def number_of_replicas(self, chunkHandle):
         '''
         Get the current number of replicas of a specified chunk
         
         @param chunkHandle: the unique ID of the chunk
         @return: (int) number of locations chunk is stored at
         '''
-        return len(self.getChunkLocations(chunkHandle))
+        return len(self.get_chunk_locations(chunkHandle))
     
     
-    def chooseChunkLocations(self, chunkHandle):
+    def choose_chunk_locations(self, chunkHandle):
         '''
         Choose locations for a chunk to be stored. Currently there is no
         load balancing in place to determine which chunkservers get chunks
@@ -239,8 +239,8 @@ class Master(net.ThreadedTCPServer):
         '''
         #TODO: Implement load balancing
         
-        currentLocations = self.getChunkLocations(chunkHandle)
-        numOfLocs = self.numberOfReplicas(chunkHandle)
+        currentLocations = self.get_chunk_locations(chunkHandle)
+        numOfLocs = self.number_of_replicas(chunkHandle)
         # In the case that an appropriate number of replicas exist, 
         if numOfLocs >= config.replicaAmount:
             return
@@ -262,7 +262,7 @@ class Master(net.ThreadedTCPServer):
             return newLocations
 
     
-    def replicateChunk(self):        
+    def replicate_chunk(self):        
         pass
     
     

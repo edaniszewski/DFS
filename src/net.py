@@ -10,14 +10,14 @@ Created on Aug 13, 2014
 import SocketServer
 import threading
 import socket
-from src import config
+import config
 
 class TCP:
     '''
     A TCP socket networking object
     '''
     
-    def getNewTCPSocketConnection(self, host, port):
+    def get_new_tcp_socket_connection(self, host, port):
         '''
         Create a new socket object, connect to the given host on the given port
         and return the socket object
@@ -35,11 +35,11 @@ class TCP:
         sock.sendall(data)
         
         
-    def getNewSocketAndSend(self, host, port, data):
+    def get_new_socket_and_send(self, host, port, data):
         '''
         Create a new socket and send data over the socket
         '''
-        self.send(self.getNewTCPSocketConnection(host, port), data)
+        self.send(self.get_new_tcp_socket_connection(host, port), data)
         
         
     def receive(self, sock):
@@ -57,7 +57,7 @@ class UDP:
     A UDP socket networking object
     '''
     
-    def getNewUDPSocketConnection(self):
+    def get_new_udp_socket_connection(self):
         '''
         Create a new socket object, connect to the given host on the given port
         and return the socket object
@@ -76,11 +76,11 @@ class UDP:
         sock.sendto(data, (config.heartbeatHost, config.heartbeatPort))
         
         
-    def getNewSocketAndSend(self, host, port, data):
+    def get_new_socket_and_send(self, host, port, data):
         '''
         Create a new socket and send data over the socket
         '''
-        self.send(self.getNewUDPSocketConnection(host, port), data)
+        self.send(self.get_new_udp_socket_connection(host, port), data)
         
         
     def receive(self, sock):
