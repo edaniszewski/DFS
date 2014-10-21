@@ -52,13 +52,15 @@ class HeartbeatDict(dict):
         '''
         #A time limit. Anything less than the time limit is stale, anything greater is still fresh
         staleTime = time.time() - config.heartbeatFreshPeriod
-        staleEntries, freshEntries = [], []
+        staleEntries, freshEntries = set(), set()
         with self._rwLock:
             #TODO: This isn't awful, but could probably be tightened up a little bit.
             for (ip, time) in self.items():
-                staleEntries.append(ip) if time < staleTime else freshEntries.append(ip)
+                staleEntries.add(ip) if time < staleTime else freshEntries.add(ip)
+            
+            # Code below could be more optimized for the code above..
+            # ([staleEntries.add(ip) for (ip, time) in self.items() if time < staleTime else freshEntries.add(ip)])
         return (freshEntries, staleEntries)
-    
     
     def update_active_hosts(self):
         '''
@@ -66,15 +68,8 @@ class HeartbeatDict(dict):
         then add any new hosts to activehosts. 
         '''
         results = self.get_entries()
-        
-        for staleEntry in results[1]:
-            if staleEntry in self.activeHosts:
-                self.activeHosts.remove(staleEntry)
-                
+        self.activeHosts.remove([staleEntry for staleEntry in results[1] if staleEntry in self.activeHosts])   
         self.activeHosts = set(self.activeHosts.extend(results[0]))
-        
-        
-        
         
         
 class HeartbeatListener(threading.Thread):
@@ -122,8 +117,6 @@ class HeartbeatClient(UDP):
             self.ping()
             time.sleep(config.beatPeriod)
     
-    
-            
             
 def main():
     event = threading.Event().set()
