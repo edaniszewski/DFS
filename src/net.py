@@ -22,10 +22,15 @@ class TCP:
         Create a new socket object, connect to the given host on the given port
         and return the socket object
         '''
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.connect((host, port))
-        return s
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.s.connect((host, port))
+            return self.s
+        except socket.error, (value,message):
+            if self.s: 
+                self.s.close() 
+            print "Could not open socket: " + message 
         
         
     def send(self, sock, data):
@@ -94,8 +99,55 @@ class UDP:
     
     
         
+class MasterServer():
+    '''
+    Base server class for the Master class. Handles all networking logic that the Master class
+    uses. MasterServer is a multi-threaded TCP server.
+    '''
+    def __init__(self):
+        self.port = config.PORT
+        self.host = config.HOST
+        self.sock = None
+        self.threads = set()
+        
+    def initialize_socket(self):
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.bind((self.host, self.port))
+            self.sock.listen(10)
+        except socket.error, (value, message):
+            if self.sock:
+                self.sock.close()
+            print "Unable to open socket: " + message
+            print "Error value: " + value
+    
+    def run(self):
+        self.initialize_socket()
+        
+        while True:
+            t = MasterRequestThread(self.sock.accept())
+            t.start()
+            self.threads.add(t)
+            
+        self.sock.close()
+        for t in self.threads:
+            t.join()
 
         
+class MasterRequestThread(threading.Thread):
+    '''
+    
+    '''
+    def __init__(self, (client, address)):
+        threading.Thread.__init__(self)
+        self.client = client
+        self.address = address
+    
+    def run(self):
+        pass
+
+   
+
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     '''
     A TCP Server class with multi-threading capabilities

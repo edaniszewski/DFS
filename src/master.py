@@ -23,7 +23,7 @@ except:
     import pickle
 
 
-class Master(net.ThreadedTCPServer):
+class Master(net.MasterServer):
     '''
     MASTER - Centralized administrator of system metadata. Initiates a global state to
     track the adding and updating of Chunks and Files. Includes (or will include) methods
@@ -36,7 +36,7 @@ class Master(net.ThreadedTCPServer):
         Constructor
         '''
         # Could use super, not sure if it matters here
-        net.ThreadedTCPServer.__init__(self, (config.HOST, config.PORT), net.ThreadedTCPHandler)
+        net.MasterServer.__init__(self)
         self.check_resources()
         self.restore_state()
         #FIXME: This is only the case for initial start up. Need algo to handle the case when the server is reset
