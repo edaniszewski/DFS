@@ -12,7 +12,7 @@ Created on Aug 13, 2014
 '''
 import os.path
 from random import choice
-
+import logging
 import config, net
 from meta.globalstate import GlobalState
 import threading
@@ -22,6 +22,9 @@ try:
 except:
     import pickle
 
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("master_logger")
 
 class Master(net.MasterServer):
     '''
@@ -83,19 +86,18 @@ class Master(net.MasterServer):
             - active hosts file: persisted list of hosts
             - oplog file: persisted log of operations executed
             - metadata snapshot: a snapshot of the global metadata
-        '''
-        #TODO: Print statements should be logged        
+        '''       
         if not os.path.isfile(config.activehosts):
             open(config.activehosts, 'w').close()
-            print "ACTIVE HOSTS FILE not found. Creating new active hosts file..."
+            log.warn("ACTIVE HOSTS FILE not found. Creating new active hosts file...")
             
         if not os.path.isfile(config.oplog):
             open(config.oplog, 'w').close()
-            print "OPLOG not found. Creating new oplog..."
+            log.warn("OPLOG not found. Creating new oplog...")
             
         if not os.path.isfile(config.metasnapshot):
             open(config.metasnapshot, 'w').close()
-            print "Snapshot persistence file not found. Creating new snapshot file..."
+            log.warn("Snapshot persistence file not found. Creating new snapshot file...")
 
        
     def load_global_state(self):
@@ -169,7 +171,7 @@ class Master(net.MasterServer):
         if curChunk.offset + appendSize < config.chunkSize:
             self.link_chunk_to_file(curChunk.chunkHandle(), fileName)
         else:
-            print "TMP MSG: can not append -- not enough space in chunk"
+            log.info("Can not append -- not enough space in chunk")
     
     def read(self):
         pass

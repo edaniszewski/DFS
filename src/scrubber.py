@@ -7,6 +7,10 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 '''
+import logging
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("heartbeat_logger")
 
 class Scrubber(object):
     '''

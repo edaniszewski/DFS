@@ -16,10 +16,14 @@ Created on Aug 13, 2014
 import socket
 import threading
 import time
+import logging
+
 import config
 import net
 from net import UDP
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("heartbeat_logger")
 
 #TODO: Need a way to persist this dict?
 class HeartbeatDict(dict):

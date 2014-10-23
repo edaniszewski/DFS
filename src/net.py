@@ -11,6 +11,10 @@ import SocketServer
 import threading
 import socket
 import config
+import logging
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("net_logger")
 
 class TCP:
     '''
@@ -30,7 +34,7 @@ class TCP:
         except socket.error, (value,message):
             if self.s: 
                 self.s.close() 
-            print "Could not open socket: " + message 
+            log.warn("Could not open socket: " + message)
         
         
     def send(self, sock, data):
@@ -118,8 +122,8 @@ class MasterServer():
         except socket.error, (value, message):
             if self.sock:
                 self.sock.close()
-            print "Unable to open socket: " + message
-            print "Error value: " + value
+            log.warn("Unable to open socket: " + message)
+            log.warn("Error value: " + value)
     
     def run(self):
         self.initialize_socket()
