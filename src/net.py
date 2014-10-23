@@ -115,6 +115,9 @@ class MasterServer():
         self.threads = set()
         
     def initialize_socket(self):
+        '''
+        Initialize a socket instance and begin listening on the socket
+        '''
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.bind((self.host, self.port))
@@ -126,8 +129,11 @@ class MasterServer():
             log.warn("Error value: " + value)
     
     def run(self):
+        '''
+        Runs the server instance. Each incoming request is passed off to 
+        a thread which receives the data and initiates appropriate action.
+        '''
         self.initialize_socket()
-        
         while True:
             t = MasterRequestThread(self.sock.accept())
             t.start()
@@ -140,18 +146,28 @@ class MasterServer():
         
 class MasterRequestThread(threading.Thread):
     '''
-    
+    A class inheriting from the Thread class, overrides the run method 
+    to receive and handle incoming data to the master.
     '''
     def __init__(self, (client, address)):
         threading.Thread.__init__(self)
         self.client = client
         self.address = address
+        self.size = 1024
     
+    # FIXME: Currently, the method contains 'filler' logic
     def run(self):
-        pass
+        running = True
+        while running:
+            data = self.client.recv(self.size)
+            if data:
+                self.client.send(data + "\t" + threading.current_thread().name)
+            else:
+                self.client.close()
+                running = False
 
    
-
+# FIXME: Depricated class
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     '''
     A TCP Server class with multi-threading capabilities
@@ -160,13 +176,12 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
         self.allow_reuse_address=True
 
-
+# FIXME: Depricated class
 class ThreadedTCPHandler(SocketServer.BaseRequestHandler):
     '''
     A threading-enabled TCP request handler
     '''
     def handle(self):
-        # TODO: Implement stronger send/recv - potentially using pickle 
         self.data = self.request.recv(1024)
         current_thread = threading.current_thread()
         response = "%s: Recieved some data!" %(current_thread.name)
