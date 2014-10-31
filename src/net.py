@@ -98,7 +98,6 @@ class UDP:
         data = sock.recv(2048)
         return data
 
-    
 
    
 class MasterServer():

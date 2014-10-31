@@ -13,7 +13,9 @@ Created on Aug 13, 2014
 import os.path
 from random import choice
 import logging
-import config, net
+import config
+from net import MasterServer
+from message import Message
 from meta.globalstate import GlobalState
 import threading
 
@@ -26,9 +28,9 @@ except:
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("master_logger")
 
-class Master(net.MasterServer):
+class Master(MasterServer):
     '''
-    MASTER - Centralized administrator of system metadata. Initiates a global state to
+    Centralized administrator of system metadata. Initiates a global state to
     track the adding and updating of Chunks and Files. Includes (or will include) methods
     to persist global state.
     '''
@@ -38,8 +40,7 @@ class Master(net.MasterServer):
         '''
         Constructor
         '''
-        # Could use super, not sure if it matters here
-        net.MasterServer.__init__(self)
+        MasterServer.__init__(self)
         self.check_resources()
         self.restore_state()
         #FIXME: This is only the case for initial start up. Need to also handle the case when the server is reset
@@ -74,11 +75,47 @@ class Master(net.MasterServer):
         print threading.current_thread().name
         data = sock.recv(1024)
         
-        #----------------------------------------
+        #========================================
         #
         # TODO: Implement parsing and delegation
         #
-        #----------------------------------------
+        #========================================
+        
+        if (data == Message.APPEND):
+            pass
+        
+        elif (data == Message.DELETE):
+            pass
+        
+        elif (data == Message.GETALLCHUNKS):
+            pass
+        
+        elif (data == Message.GETFILENAMES):
+            pass
+        
+        elif (data == Message.GETITEMSTODELETE):
+            pass
+        
+        elif (data == Message.GETLOCATIONS):
+            pass
+        
+        elif (data == Message.READ):
+            pass
+        
+        elif (data == Message.SANITIZE):
+            pass
+        
+        elif (data == Message.UNDELETE):
+            pass
+        
+        elif (data == Message.WRITE):
+            pass
+        
+        else:
+            log.warn("Message not recognized.")
+            
+        #========================================
+        
         sock.send("Placeholder")
 
     def get_current_chunk(self):
