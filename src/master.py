@@ -42,11 +42,44 @@ class Master(net.MasterServer):
         net.MasterServer.__init__(self)
         self.check_resources()
         self.restore_state()
-        #FIXME: This is only the case for initial start up. Need algo to handle the case when the server is reset
+        #FIXME: This is only the case for initial start up. Need to also handle the case when the server is reset
         self.currentChunk = self.get_current_chunk()
-        self.start_master_server()
+        self.run()
         
+        
+    def run(self):
+        '''
+        Run the server. Initializes a socket and listens over it. Each incoming request is passed
+        to a handler thread.
+        '''
+        self.initialize_socket()
+        
+        while True:
+            sock, addr = self.sock.accept()
 
+            t = threading.Thread(target=self.handle, args=(sock, addr))
+            t.daemon = True
+            t.start()
+            self.threads.add(t)
+            
+        self.sock.close()
+        for t in self.threads:
+            t.join()
+
+    def handle(self, sock, address):
+        '''
+        Method called by the run method when the server receives an incoming request. The request
+        is parsed and delegated out accordingly.
+        '''
+        print threading.current_thread().name
+        data = sock.recv(1024)
+        
+        #----------------------------------------
+        #
+        # TODO: Implement parsing and delegation
+        #
+        #----------------------------------------
+        sock.send("Placeholder")
 
     def get_current_chunk(self):
         '''
@@ -66,15 +99,6 @@ class Master(net.MasterServer):
         '''
         with open(config.metasnapshot, 'wb') as f:
             pickle.dump(self.gs, f)
-        
-        
-    def start_master_server(self):
-        '''
-        Start the server that the master will listen over
-        '''
-        server_thread = threading.Thread(target=self.serve_forever())
-        server_thread.daemon=True
-        server_thread.start()
         
         
     def check_resources(self):
@@ -183,21 +207,39 @@ class Master(net.MasterServer):
         pass
     
     def append_lock(self):
+        '''
+        Get a thread lock on a chunk to initiate a synchronous append on the chunk
+        '''
         pass
     
     def append_unlock(self):
+        '''
+        Remove the thread lock on a chunk to allow other threads append access to the chunk
+        '''
         pass
     
     def read_lock(self):
+        '''
+        Get a thread lock on a chink to initiate a synchronous read on the chunk
+        '''
         pass
     
     def read_unlock(self):
+        '''
+        Remove the thread lock on a chunk to allow other threads read access to the chunk
+        '''
         pass
     
     def is_append_locked(self):
+        '''
+        Check to see if a chunk has an active append lock
+        '''
         pass
     
     def is_read_locked(self):
+        '''
+        Check to see if a chunk has an active read lock
+        '''
         pass
     
     def delete_chunk(self):
