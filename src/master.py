@@ -13,16 +13,14 @@ Created on Aug 13, 2014
 import os.path
 from random import choice
 import logging
+import cPickle as pickle
+
 import config
 from net import MasterServer
 from message import Message
 from meta.globalstate import GlobalState
 import threading
-
-try:
-    import cPickle as pickle
-except:
-    import pickle
+import heartbeat
 
 
 logging.basicConfig(level=logging.INFO)
@@ -34,18 +32,38 @@ class Master(MasterServer):
     track the adding and updating of Chunks and Files. Includes (or will include) methods
     to persist global state.
     '''
-
-
     def __init__(self):
-        '''
-        Constructor
-        '''
         MasterServer.__init__(self)
+        self.initialize_master()
+        self.initialize_heart_beat_listener()
+        self.run()
+        
+        
+    def initialize_master(self):
+        '''
+        Executes a sequence of methods in order to properly set up the master server
+        '''
+        log.info("Initializing master...")
+        
         self.check_resources()
         self.restore_state()
         #FIXME: This is only the case for initial start up. Need to also handle the case when the server is reset
         self.currentChunk = self.get_current_chunk()
-        self.run()
+        
+        log.info("Master initialized successfully")
+        
+    
+    def initialize_heart_beat_listener(self):
+        '''
+        Initialize an instance of the heartbeat listener
+        '''
+        log.info("Initializing heartbeat listener...")
+        
+        listener = heartbeat.HeartbeatListener()
+        listener.daemon = True
+        listener.start()
+        
+        log.info("Heartbeat listener initialized successfully")
         
         
     def run(self):
@@ -53,6 +71,8 @@ class Master(MasterServer):
         Run the server. Initializes a socket and listens over it. Each incoming request is passed
         to a handler thread.
         '''
+        log.info("Running master server")
+        
         self.initialize_socket()
         
         while True:
@@ -82,33 +102,23 @@ class Master(MasterServer):
         #========================================
         
         if (data == Message.APPEND):
-            pass
-        
-        elif (data == Message.DELETE):
-            pass
-        
-        elif (data == Message.GETALLCHUNKS):
-            pass
-        
-        elif (data == Message.GETFILENAMES):
-            pass
-        
-        elif (data == Message.GETITEMSTODELETE):
-            pass
-        
-        elif (data == Message.GETLOCATIONS):
+            #self.append(fileName, appendSize)
             pass
         
         elif (data == Message.READ):
+            #self.read()
             pass
         
         elif (data == Message.SANITIZE):
+            #self.sanitize()
+            pass
+        
+        elif (data == Message.DELETE):
+            #self.delete()
             pass
         
         elif (data == Message.UNDELETE):
-            pass
-        
-        elif (data == Message.WRITE):
+            #self.undelete()
             pass
         
         else:
@@ -116,7 +126,9 @@ class Master(MasterServer):
             
         #========================================
         
-        sock.send("Placeholder")
+        # FIXME: Eventually, will want to send back some kind of message.
+        sock.send("PLACEHOLDER")
+
 
     def get_current_chunk(self):
         '''
@@ -126,14 +138,18 @@ class Master(MasterServer):
         @return: Chunk object
         '''
         if self.gs.chunkHandle == 0:
-            self.gs.addChunk(self.gs.incrementAndGetChunkHandle())
-        return self.gs.getChunk(self.gs.chunkHandle)
+            self.gs.add_chunk(self.gs.increment_and_get_chunk_handle())
+        return self.gs.get_chunk(self.gs.chunkHandle)
 
 
     def state_snapshot(self):
         '''
         Take a snapshot of the metadata and persist it to disk
         '''
+        #FIXME: Instead of replacing the previous snapshot, could have snapshots be incremental or 
+        # timestamped, and persist them in their own directory. This could allow you to return to 
+        # a state older than that of the previous snapshot. Since snapshots should be taken somewhat
+        # frequently, it is possible that keeping only the past 10? 100? 1000? would be necessary. 
         with open(config.metasnapshot, 'wb') as f:
             pickle.dump(self.gs, f)
         
@@ -344,6 +360,9 @@ class Master(MasterServer):
 
     
     def replicate_chunk(self):        
+        pass
+    
+    def sanitize(self):
         pass
     
     

@@ -11,12 +11,7 @@ Created on Oct 31, 2014
 
 class Message:
     READ = 1
-    WRITE = 2
-    APPEND = 3
-    DELETE = 4
-    UNDELETE = 5
-    SANITIZE = 6
-    GETITEMSTODELETE = 7
-    GETALLCHUNKS = 8
-    GETLOCATIONS = 9
-    GETFILENAMES = 10
+    APPEND = 2
+    DELETE = 3
+    UNDELETE = 4
+    SANITIZE = 5

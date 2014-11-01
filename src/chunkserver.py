@@ -28,10 +28,11 @@ class Chunkserver(object):
         self.heartbeat = HeartbeatClient()
         
         
-    def heartbeat(self):
+    def start_heartbeat(self):
         '''
         Broadcast a heartbeat message
         '''
+        # TODO: This method should be called as a thread to prevent blocking
         self.heartbeat.ping_forever()
         
         

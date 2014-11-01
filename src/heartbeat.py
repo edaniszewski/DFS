@@ -81,13 +81,28 @@ class HeartbeatListener(threading.Thread):
     Listen for heart beat pings from HeartbeatClient classes, which are to be instantiated
     with the chunkservers. Update the HeartbeatDict in accordance with the pings received.
     '''
-    def __init__(self, event):
-        self.event = event
+    def __init__(self):
+        threading.Thread.__init__(self)
         self.hbdict = HeartbeatDict()
-        self.sock = net.UDP.get_new_udp_socket_connection();
+        self.sock = None
+        
+        
+    def initialize_socket(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.settimeout(config.heartbeatTimeout)
+            s.bind((config.heartbeatHost, config.heartbeatPort))
+            self.sock = s
+        except:
+            if self.sock:
+                self.sock.close()
+            log.error("Could not initialize heartbeat listener socket")
+        
         
     def run(self):
-        while self.event.isSet():
+        self.initialize_socket()
+        
+        while True:
             try:
                 data, addr = self.sock.recvfrom(8)
                 if data == "<3":
@@ -123,8 +138,7 @@ class HeartbeatClient(UDP):
     
             
 def main():
-    event = threading.Event().set()
-    listener = HeartbeatListener(event)
+    listener = HeartbeatListener()
     listener.start()
 
 

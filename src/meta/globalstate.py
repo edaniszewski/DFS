@@ -24,27 +24,21 @@ class GlobalState(object):
     Contains important global state, including the chunkHandle incrementor
     
     @var chunkHandle:    unique ID tracker for chunks
-    @var toDelete:    list holding file names of the files that have been flagged for deletion
+    @var toDelete:    set holding file names of the files that have been flagged for deletion
     @var fileMap:    dictionary with key=(str)filename, value=(File)file object
     @var chunkMap:    dictionary with key=(int)chunkHandle, value(Chunk)chunk object
     @var hosts:     list of chunkserver IP addresses
     @var activeHosts:    list of active chunkserver IP addresses
     '''
-
-
     def __init__(self):
-        '''
-        Constructor
-        '''
-        self.chunkHandle = 0
-        self.toDelete = []
+        self._chunkHandle = 0
+        self.toDelete = set()
         self.fileMap = {}
         self.chunkMap = {}
         self.hosts = []
         self.activeHosts = []
         
-        
-        
+ 
     def refresh_hosts(self):
         '''
         Refresh the list of host IPs
@@ -65,7 +59,7 @@ class GlobalState(object):
         '''
         Increments the chunk handle.
         '''
-        self.chunkHandle += 1
+        self._chunkHandle += 1
         
         
     def increment_and_get_chunk_handle(self):
@@ -73,7 +67,7 @@ class GlobalState(object):
         Increment the chunk handle and return the new chunk handle
         '''
         self.increment_chunk_handle()
-        return self.chunkHandle
+        return self._chunkHandle
     
     
     def add_file(self, filename):
@@ -92,7 +86,7 @@ class GlobalState(object):
         Add a file to the tracked list of pending deletions
         '''
         if filename in self.fileMap.keys():
-            self.toDelete.append(filename)
+            self.toDelete.add(filename)
             return 1
         else:
             return 0
@@ -190,6 +184,5 @@ class GlobalState(object):
             del self.chunkMap[chunkHandle]
         except Exception:
             raise RuntimeError('Unable to delete chunk handle from map.')
-    
-    
-    
+
+
