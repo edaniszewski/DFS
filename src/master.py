@@ -22,7 +22,6 @@ from meta.globalstate import GlobalState
 import threading
 import heartbeat
 
-
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("master_logger")
 
@@ -92,7 +91,7 @@ class Master(MasterServer):
         Method called by the run method when the server receives an incoming request. The request
         is parsed and delegated out accordingly.
         '''
-        print threading.current_thread().name
+        log.info(threading.current_thread().name)
         data = sock.recv(1024)
         
         #========================================
@@ -119,6 +118,18 @@ class Master(MasterServer):
         
         elif (data == Message.UNDELETE):
             #self.undelete()
+            pass
+        
+        elif (data == Message.CREATE):
+            pass
+        
+        elif (data == Message.OPEN):
+            pass
+        
+        elif (data == Message.CLOSE):
+            pass
+        
+        elif (data == Message.WRITE):
             pass
         
         else:
