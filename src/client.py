@@ -8,14 +8,9 @@ import config
 
 class Client(object):
     '''
-    classdocs
+    User-end client
     '''
-
-
     def __init__(self):
-        '''
-        Constructor
-        '''
         self.BUF_SIZE = 1024
         
         
@@ -29,10 +24,10 @@ class Client(object):
             print "Client received: %s" %response
         finally:
             sock.close()
-            
-            
-if __name__=="__main__":
+
+
+if __name__ == '__main__':
     client = Client()
     
-    for x in range(10):
-        client.client('127.0.0.1', config.PORT, "message " + str(x))
+    while 1:
+        client.client(config.HOST, config.PORT, raw_input(">"))
