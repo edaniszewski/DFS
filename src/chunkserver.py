@@ -133,16 +133,26 @@ class Chunkserver(ChunkServer):
         '''
         Create a file that will be the chunk
         
-        @param chunkHandle: the unique ID of the chunk
+        @param chunkHandle: the unique ID of the chunk to create
         '''
         open(config.chunkstore + str(chunkHandle), 'w').close()
 
 
-    def append_chunk(self):
-        pass
+    def append_chunk(self, chunkHandle, data):
+        '''
+        Append data to a specified chunk
+        
+        @param chunkHandle: the unique ID of the chunk to append to
+        @param data: The data to append to the given chunk
+        '''
+        with open(config.chunkstore + str(chunkHandle), 'a') as f:
+            f.write(data)
 
 
-    def read_chunk(self):
+    def read_chunk(self, chunkHandle):
+        '''
+        Read from a specified chunk
+        '''
         pass
 
 
@@ -154,6 +164,7 @@ class Chunkserver(ChunkServer):
         '''
         os.remove(config.chunkstore + str(chunkHandle))
     
-    
 
-chunkserver = Chunkserver()
+    
+if __name__=="__main__":
+    chunkserver = Chunkserver()
