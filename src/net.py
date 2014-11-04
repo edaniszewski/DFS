@@ -13,56 +13,13 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("net_logger")
-
-class TCP:
-    '''
-    A TCP socket networking object
-    '''
-    
-    def get_new_tcp_socket_connection(self, host, port):
-        '''
-        Create a new socket object, connect to the given host on the given port
-        and return the socket object
-        '''
-        try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.s.connect((host, port))
-            return self.s
-        except socket.error, (value,message):
-            if self.s: 
-                self.s.close() 
-            log.warn("Could not open socket: " + message)
-        
-        
-    def send(self, sock, data):
-        '''
-        Send data over a given socket
-        '''
-        sock.sendall(data)
-        
-        
-    def get_new_socket_and_send(self, host, port, data):
-        '''
-        Create a new socket and send data over the socket
-        '''
-        self.send(self.get_new_tcp_socket_connection(host, port), data)
-        
-        
-    def receive(self, sock):
-        '''
-        Receive data from a socket connection
-        '''
-        #TODO: This is just a dummy receive for now. Will need to implement a real one once protocol is further developed.
-        data = sock.recv(2048)
-        return data
-        
-        
         
 class UDP:
     '''
     A UDP socket networking object
     '''
+    def __init__(self):
+        self.socket = self.get_new_udp_socket_connection()
     
     def get_new_udp_socket_connection(self):
         '''
@@ -83,13 +40,6 @@ class UDP:
         sock.sendto(data, (config.heartbeatHost, config.heartbeatPort))
         
         
-    def get_new_socket_and_send(self, host, port, data):
-        '''
-        Create a new socket and send data over the socket
-        '''
-        self.send(self.get_new_udp_socket_connection(host, port), data)
-        
-        
     def receive(self, sock):
         '''
         Receive data from a socket connection
@@ -99,7 +49,36 @@ class UDP:
         return data
 
 
-   
+class ChunkServer():
+    '''
+    Base server class for chunkservers. Handles all networking logic that chunkservers use. 
+    '''
+    def __init__(self):
+        # FIXME: Are the chunkservers on the same port? They should be a different host
+        # since they should be running from a seperate machine, but I suppose that shouldn't
+        # matter too much.
+        self.port = config.PORT
+        self.host = config.HOST
+        self.sock = None
+        self.threads = set()
+        
+    def initialize_socket(self):
+        '''
+        Initializes and binds a socket for the server on the host and port specified
+        in the configuration file.
+        '''
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.bind((self.host, self.port))
+            self.sock.listen(10)
+        except socket.error, (value, message):
+            if self.sock:
+                self.sock.close()
+            #TODO: LOG and provide means for graceful failure
+            print "Unable to open socket: " + message
+            print "Error value: " + str(value)
+
+
 class MasterServer():
     '''
     Base server class for the Master class. Handles all networking logic that the Master class
