@@ -9,9 +9,16 @@ Created on Oct 31, 2014
 '''
 
 
-class Message:
+class Message:  
     READ = 1
     APPEND = 2
     DELETE = 3
     UNDELETE = 4
     SANITIZE = 5
+    CREATE = 6
+    OPEN = 7
+    CLOSE = 8
+    WRITE = 9
+    
+    CONTENTS = 10
+    CHUNKSPACE = 11
