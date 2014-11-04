@@ -117,6 +117,7 @@ class HeartbeatClient(UDP):
     HeartbeatListener
     '''
     def __init__(self):
+        UDP.__init__(self)
         self.msg = "<3"
     
     
@@ -124,8 +125,7 @@ class HeartbeatClient(UDP):
         '''
         Ping the heartbeat listener
         '''
-        sock = self.get_new_udp_socket_connection()
-        self.send(sock, self.msg)
+        self.send(self.socket, self.msg)
         
         
     def ping_forever(self):
