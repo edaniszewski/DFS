@@ -1,10 +1,10 @@
-'''
+"""
 System configuration options
 
 Created on Aug 16, 2014
 
 @author: erickdaniszewski
-'''
+"""
 
 ## FILE PATH DEFINITIONS
 oplog = "../resources/OPLOG.log"
@@ -15,9 +15,9 @@ chunkstore = "../chunkstore/"
 
 
 ## SYSTEM CONSTANTS
-chunkSize = 2**10
+chunkSize = 2 ** 10
 replicaAmount = 3
-PORT = 9500 # TODO: look in to which port would be best, if it even matters
+PORT = 9500  # TODO: look in to which port would be best, if it even matters
 HOST = '127.0.0.1'
 heartbeatFreshPeriod = 15
 heartbeatTimeout = 10
