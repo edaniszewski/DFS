@@ -29,23 +29,23 @@ class Test(unittest.TestCase):
         
         
     def testAddFile(self):
-        self.assertEqual(0, len(self.gs.fileMap), "check that filemap is initially empty")
+        self.assertEqual(0, len(self.gs.file_map), "check that filemap is initially empty")
         self.assertTrue(self.gs.add_file(self.fileName), "check for proper return code")
-        self.assertEqual(1, len(self.gs.fileMap), "check that single entry exists")
+        self.assertEqual(1, len(self.gs.file_map), "check that single entry exists")
         self.assertFalse(self.gs.add_file(self.fileName), "should not re-create existing file")
-        self.assertEqual(1, len(self.gs.fileMap), "check that single entry exists")
+        self.assertEqual(1, len(self.gs.file_map), "check that single entry exists")
         
         
     def testQueueingDelete(self):
         self.gs.add_file(self.fileName)
         
-        self.assertEqual(0, len(self.gs.toDelete), "check that filemap is initially empty")
+        self.assertEqual(0, len(self.gs.to_delete), "check that filemap is initially empty")
         self.assertTrue(self.gs.queue_delete(self.fileName), "check for proper return code")
-        self.assertEqual(self.fileName, self.gs.toDelete[0], "check that proper file name is kept")
-        self.assertEqual(1, len(self.gs.toDelete), "check that single entry exists")
+        self.assertEqual(self.fileName, self.gs.to_delete[0], "check that proper file name is kept")
+        self.assertEqual(1, len(self.gs.to_delete), "check that single entry exists")
         self.assertFalse(self.gs.queue_delete(self.fileName + "1"), "check handling of invalid file name")
         self.assertTrue(self.gs.dequeueDelete(self.fileName), "check for proper return code")
-        self.assertEqual(0, len(self.gs.toDelete), "check that filemap is empty")
+        self.assertEqual(0, len(self.gs.to_delete), "check that filemap is empty")
         self.assertFalse(self.gs.dequeueDelete(self.fileName), "test removing something that is not in the list")
 
 
@@ -86,21 +86,21 @@ class Test(unittest.TestCase):
         self.gs.add_file(self.fileName + "2")
         self.gs.add_file(self.fileName + "3")
         
-        self.assertEqual(3, len(self.gs.fileMap))
+        self.assertEqual(3, len(self.gs.file_map))
         
         self.gs.clean_file_map(self.fileName + "2")
         
-        self.assertEqual(2, len(self.gs.fileMap))
+        self.assertEqual(2, len(self.gs.file_map))
         names = self.gs.get_file_names()
         self.assertNotIn(self.fileName + "2", names)
         
         
     def testAddChunk(self):
-        self.assertEqual(0, len(self.gs.chunkMap), "check that chunkmap is initially empty")
+        self.assertEqual(0, len(self.gs.chunk_map), "check that chunkmap is initially empty")
         self.assertTrue(self.gs.add_chunk(1), "check for proper return code")
-        self.assertEqual(1, len(self.gs.chunkMap), "check that single entry exists")
+        self.assertEqual(1, len(self.gs.chunk_map), "check that single entry exists")
         self.assertFalse(self.gs.add_chunk(1), "should not re-create existing chunk")
-        self.assertEqual(1, len(self.gs.chunkMap), "check that single entry exists")
+        self.assertEqual(1, len(self.gs.chunk_map), "check that single entry exists")
         
         
     def testGetChunk(self):
@@ -139,11 +139,11 @@ class Test(unittest.TestCase):
         self.gs.add_chunk(2)
         self.gs.add_chunk(3)
         
-        self.assertEqual(3, len(self.gs.chunkMap))
+        self.assertEqual(3, len(self.gs.chunk_map))
         
         self.gs.clean_chunk_map(2)
         
-        self.assertEqual(2, len(self.gs.chunkMap))
+        self.assertEqual(2, len(self.gs.chunk_map))
         chunkHandles = self.gs.get_chunk_ids()
         self.assertNotIn(2, chunkHandles)
         

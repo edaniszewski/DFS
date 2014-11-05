@@ -15,12 +15,12 @@ chunkstore = "../chunkstore/"
 
 
 ## SYSTEM CONSTANTS
-chunkSize = 2 ** 10
-replicaAmount = 3
+chunk_size = 2 ** 10
+replica_amount = 3
 PORT = 9500  # TODO: look in to which port would be best, if it even matters
 HOST = '127.0.0.1'
-heartbeatFreshPeriod = 15
-heartbeatTimeout = 10
-heartbeatPort = 9550
-heartbeatHost = '127.0.0.1'
-beatPeriod = 5
+heartbeat_fresh_period = 15
+heartbeat_timeout = 10
+heartbeat_port = 9550
+heartbeat_host = '127.0.0.1'
+beat_period = 5

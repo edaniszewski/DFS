@@ -31,9 +31,9 @@ class UDP:
         and return the socket object
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.settimeout(config.heartbeatTimeout)
+        s.settimeout(config.heartbeat_timeout)
         # TODO: this seems weird, need to think about how to define ports/host for heartbeat udp
-        s.bind((config.heartbeatHost, config.heartbeatPort))
+        s.bind((config.heartbeat_host, config.heartbeat_port))
         return s
 
 
@@ -41,7 +41,7 @@ class UDP:
         """
         Send data over a given socket
         """
-        sock.sendto(data, (config.heartbeatHost, config.heartbeatPort))
+        sock.sendto(data, (config.heartbeat_host, config.heartbeat_port))
 
 
     def receive(self, sock):

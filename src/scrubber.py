@@ -19,5 +19,5 @@ class Scrubber():
     which have been marked for deletion.
     """
 
-    def __init__(self, params):
+    def __init__(self):
         pass

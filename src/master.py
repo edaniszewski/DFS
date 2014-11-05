@@ -88,6 +88,7 @@ class Master(MasterServer):
         is parsed and delegated out accordingly.
         """
         log.info(threading.current_thread().name)
+        m = Message()
         data = sock.recv(1024)
 
         # ========================================
@@ -96,36 +97,36 @@ class Master(MasterServer):
         #
         #========================================
 
-        if data == Message.APPEND:
+        if data == m.APPEND:
             #self.append(fileName, appendSize)
             pass
 
-        elif data == Message.READ:
+        elif data == m.READ:
             #self.read()
             pass
 
-        elif data == Message.SANITIZE:
+        elif data == m.SANITIZE:
             #self.sanitize()
             pass
 
-        elif data == Message.DELETE:
+        elif data == m.DELETE:
             #self.delete()
             pass
 
-        elif data == Message.UNDELETE:
+        elif data == m.UNDELETE:
             #self.undelete()
             pass
 
-        elif data == Message.CREATE:
+        elif data == m.CREATE:
             pass
 
-        elif data == Message.OPEN:
+        elif data == m.OPEN:
             pass
 
-        elif data == Message.CLOSE:
+        elif data == m.CLOSE:
             pass
 
-        elif data == Message.WRITE:
+        elif data == m.WRITE:
             pass
 
         else:
@@ -207,43 +208,35 @@ class Master(MasterServer):
         """
         pass
 
-    def create_new_file(self, fileName):
+    def create_new_file(self, file_name):
         """
         Instantiate a new File object
-
-        @param fileName: The name of the file to be created
         """
-        self.gs.addFile(fileName)
+        self.gs.addFile(file_name)
 
     def create_new_chunk(self):
         """
         On CREATE or APPEND, master will create a new metadata Chunk
         Object to track the new chunk.
         """
-        chunkHandle = self.gs.incrementAndGetChunkHandle()
-        self.gs.addChunk(chunkHandle)
+        chunk_handle = self.gs.incrementAndGetChunkHandle()
+        self.gs.addChunk(chunk_handle)
 
-    def link_chunk_to_file(self, chunkHandle, fileName):
+    def link_chunk_to_file(self, chunk_handle, file_name):
         """
         When a new file is created, it needs to be associated with the
         chunk(s) that contain its data
-
-        @param chunkHandle: the unique ID of the chunk
-        @param fileName: the name of the file to be associated with the chunk
         """
-        f = self.gs.getFile(fileName)
-        f.chunkHandles.append(chunkHandle)
+        f = self.gs.getFile(file_name)
+        f.chunkHandles.append(chunk_handle)
 
-    def append(self, fileName, appendSize):
+    def append(self, file_name, append_size):
         """
         Retrieves metadata necessary for an append to occur
-
-        @param fileName: the name of the file being appended to
-        @param appendSize: amount of data (in bytes) to be appended to the chunk
         """
-        curChunk = self.currentChunk
-        if curChunk.offset + appendSize < config.chunkSize:
-            self.link_chunk_to_file(curChunk.chunkHandle(), fileName)
+        current_chunk = self.currentChunk
+        if current_chunk.offset + append_size < config.chunk_size:
+            self.link_chunk_to_file(current_chunk.chunkHandle(), file_name)
         else:
             log.info("Can not append -- not enough space in chunk")
 
@@ -303,54 +296,46 @@ class Master(MasterServer):
             return True
         return False
 
-    def get_chunk_locations(self, chunkHandle):
+    def get_chunk_locations(self, chunk_handle):
         """
         Get the current locations that a chunk is stored at
-
-        @param chunkHandle: the unique ID of the chunk
-        @return: (list) the IP addresses of the chunkservers the chunk is stored on
         """
-        return self.gs.chunkMap[chunkHandle].chunkserverLocations
+        return self.gs.chunk_map[chunk_handle].chunkserverLocations
 
-    def number_of_replicas(self, chunkHandle):
+    def number_of_replicas(self, chunk_handle):
         """
         Get the current number of replicas of a specified chunk
-
-        @param chunkHandle: the unique ID of the chunk
-        @return: (int) number of locations chunk is stored at
         """
-        return len(self.get_chunk_locations(chunkHandle))
+        return len(self.get_chunk_locations(chunk_handle))
 
-    def choose_chunk_locations(self, chunkHandle):
+    def choose_chunk_locations(self, chunk_handle):
         """
         Choose locations for a chunk to be stored. Currently there is no
         load balancing in place to determine which chunkservers get chunks
-
-        @param chunkHandle: the handle of the chunk to get locations for
         """
         # TODO: Implement load balancing
 
-        currentLocations = self.get_chunk_locations(chunkHandle)
-        numOfLocs = self.number_of_replicas(chunkHandle)
+        current_locations = self.get_chunk_locations(chunk_handle)
+        num_of_locs = self.number_of_replicas(chunk_handle)
         # In the case that an appropriate number of replicas exist, 
-        if numOfLocs >= config.replicaAmount:
+        if num_of_locs >= config.replica_amount:
             return
         else:
-            amntLocNeeded = config.replicaAmount - numOfLocs
-            activeHosts = self.gs.activeHosts
-            newLocations = []
+            amnt_of_locs_needed = config.replica_amount - num_of_locs
+            active_hosts = self.gs.active_hosts
+            new_locations = []
 
             # Remove the locations the chunk already occupies
-            for host in currentLocations:
-                activeHosts.remove(host)
+            for host in current_locations:
+                active_hosts.remove(host)
 
             # Choose new locations for the chunk
-            for num in amntLocNeeded:  # @UnusedVariable
-                loc = choice(activeHosts)
-                newLocations.append(loc)
-                activeHosts.remove(loc)
+            for num in amnt_of_locs_needed:
+                loc = choice(active_hosts)
+                new_locations.append(loc)
+                active_hosts.remove(loc)
 
-            return newLocations
+            return new_locations
 
     def replicate_chunk(self):
         pass

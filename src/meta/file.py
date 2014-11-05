@@ -11,18 +11,13 @@ Created on Aug 13, 2014
 class File(object):
     """
     Contains the metadata associated with a file.
-
-    @var fileName: name of the file
-    @var chunkHandles: list of chunkHandles of associated chunks
-    @var delete: flag for deletion
-    @var size: the size of the file
     """
 
-    def __init__(self, fileName):
+    def __init__(self, file_name):
         # TODO: NAMESPACE implementation
-        #TODO: FUTURE FEATURE: password-enabled files
-        self.fileName = fileName
-        self.chunkHandles = []
+        # TODO: FUTURE FEATURE: password-enabled files
+        self.file_name = file_name
+        self.chunk_handles = []
         self.delete = False
         self.size = None
         self.namespace = None

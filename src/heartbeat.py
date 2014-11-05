@@ -56,16 +56,16 @@ class HeartbeatDict(dict):
         time stamp older than a threshold amount (inactive IPs).
         """
         #A time limit. Anything less than the time limit is stale, anything greater is still fresh
-        staleTime = time.time() - config.heartbeatFreshPeriod
-        staleEntries, freshEntries = set(), set()
+        stale_time = time.time() - config.heartbeat_fresh_period
+        stale_entries, fresh_entries = set(), set()
         with self._rwLock:
             #TODO: This isn't awful, but could probably be tightened up a little bit.
-            for (ip, time) in self.items():
-                staleEntries.add(ip) if time < staleTime else freshEntries.add(ip)
+            for (ip, ping_time) in self.items():
+                stale_entries.add(ip) if ping_time < stale_time else fresh_entries.add(ip)
 
                 # Code below could be more optimized for the code above..
                 # ([staleEntries.add(ip) for (ip, time) in self.items() if time < staleTime else freshEntries.add(ip)])
-        return freshEntries, staleEntries
+        return fresh_entries, stale_entries
 
     def update_active_hosts(self):
         """
@@ -73,7 +73,7 @@ class HeartbeatDict(dict):
         then add any new hosts to activehosts.
         """
         results = self.get_entries()
-        self.activeHosts.remove([staleEntry for staleEntry in results[1] if staleEntry in self.activeHosts])
+        self.activeHosts.remove([stale_entry for stale_entry in results[1] if stale_entry in self.activeHosts])
         self.activeHosts = set(self.activeHosts.extend(results[0]))
 
 
@@ -91,8 +91,8 @@ class HeartbeatListener(threading.Thread):
     def initialize_socket(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.settimeout(config.heartbeatTimeout)
-            s.bind((config.heartbeatHost, config.heartbeatPort))
+            s.settimeout(config.heartbeat_timeout)
+            s.bind((config.heartbeat_host, config.heartbeat_port))
             self.sock = s
         except socket.error:
             if self.sock:
@@ -133,7 +133,7 @@ class HeartbeatClient(UDP):
         """
         while True:
             self.ping()
-            time.sleep(config.beatPeriod)
+            time.sleep(config.beat_period)
 
 
 def main():

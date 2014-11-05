@@ -12,21 +12,17 @@ import config
 class Chunk(object):
     """
     Contains the metadata associated with a chunk.
-
-    chunkHandle: unique ID of the chunk
-    chunkserverLocations: list of the chunkserves the chunk exists on
-    length: current size of the chunk
     """
 
-    def __init__(self, chunkHandle, chunkserverLocations=[]):
-        self.chunkHandle = chunkHandle
-        self.chunkserverLocations = chunkserverLocations
+    def __init__(self, chunk_handle, chunkserver_locations=[]):
+        self.chunkHandle = chunk_handle
+        self.chunkserver_locations = chunkserver_locations
         self.offset = 0
 
-    def check_remaining_size(self, sizeToAppend):
+    def check_remaining_size(self, size_to_append):
         """
         Checks if a given size will fit on the chunk
         """
-        if (self.offset + sizeToAppend) > config.chunkSize:
+        if (self.offset + size_to_append) > config.chunk_size:
             return False
         return True

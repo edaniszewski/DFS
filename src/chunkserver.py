@@ -86,6 +86,7 @@ class Chunkserver(ChunkServer):
         Method to handle incoming requests to the chunkserver
         """
         log.info(threading.current_thread().name)
+        m = Message()
         data = sock.recv(1024)
 
         # ========================================
@@ -94,66 +95,59 @@ class Chunkserver(ChunkServer):
         #
         # ========================================
 
-        if data == Message.CREATE:
+        if data == m.CREATE:
             #self.create_chunk(chunkHandle)
             pass
 
-        elif data == Message.APPEND:
+        elif data == m.APPEND:
             #self.append_chunk()
             pass
 
-        elif data == Message.DELETE:
+        elif data == m.DELETE:
             #self.delete_chunk(chunkHandle)
             pass
 
-        elif data == Message.READ:
+        elif data == m.READ:
             #self.read_chunk()
             pass
 
-        elif data == Message.WRITE:
+        elif data == m.WRITE:
             pass
 
-        elif data == Message.CONTENTS:
+        elif data == m.CONTENTS:
             pass
 
-        elif data == Message.CHUNKSPACE:
+        elif data == m.CHUNKSPACE:
             pass
 
         else:
             log.warn("Message not recognized")
             #========================================
 
-    def create_chunk(self, chunkHandle):
+    def create_chunk(self, chunk_handle):
         """
         Create a file that will be the chunk
-
-        @param chunkHandle: the unique ID of the chunk to create
         """
-        open(config.chunkstore + str(chunkHandle), 'w').close()
+        open(config.chunkstore + str(chunk_handle), 'w').close()
 
-    def append_chunk(self, chunkHandle, data):
+    def append_chunk(self, chunk_handle, data):
         """
         Append data to a specified chunk
-
-        @param chunkHandle: the unique ID of the chunk to append to
-        @param data: The data to append to the given chunk
         """
-        with open(config.chunkstore + str(chunkHandle), 'a') as f:
+        with open(config.chunkstore + str(chunk_handle), 'a') as f:
             f.write(data)
 
-    def read_chunk(self, chunkHandle):
+    def read_chunk(self, chunk_handle):
         """
         Read from a specified chunk
         """
         pass
 
-    def delete_chunk(self, chunkHandle):
+    def delete_chunk(self, chunk_handle):
         """
         Deletes a chunk from the chunkstore
-
-        @param chunkHandle: the unique ID of the chunk
         """
-        os.remove(config.chunkstore + str(chunkHandle))
+        os.remove(config.chunkstore + str(chunk_handle))
 
 
 if __name__ == "__main__":

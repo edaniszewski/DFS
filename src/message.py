@@ -10,15 +10,19 @@ Created on Oct 31, 2014
 
 
 class Message:
-    READ = 1
-    APPEND = 2
-    DELETE = 3
-    UNDELETE = 4
-    SANITIZE = 5
-    CREATE = 6
-    OPEN = 7
-    CLOSE = 8
-    WRITE = 9
+    """
+    Byte-size message codes for system wide communications
+    """
 
-    CONTENTS = 10
-    CHUNKSPACE = 11
+    def __init__(self):
+        self.READ = 1
+        self.APPEND = 2
+        self.DELETE = 3
+        self.UNDELETE = 4
+        self.SANITIZE = 5
+        self.CREATE = 6
+        self.OPEN = 7
+        self.CLOSE = 8
+        self.WRITE = 9
+        self.CONTENTS = 10
+        self.CHUNKSPACE = 11
