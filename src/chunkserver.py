@@ -91,41 +91,51 @@ class Chunkserver(ChunkServer):
         log.info(threading.current_thread().name)
         data = sock.recv(1024)
 
-        # ========================================
-        #
         # TODO: Implement parsing and delegation
-        #
-        # ========================================
-
         if data == self.m.CREATE:
-            #self.create_chunk(chunkHandle)
+            #if not self.create_chunk(chunkHandle):
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.APPEND:
-            #self.append_chunk()
+            #if not self.append_chunk():
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.DELETE:
-            #self.delete_chunk(chunkHandle)
+            #if not self.delete_chunk(chunkHandle):
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.READ:
-            #self.read_chunk()
+            #if not self.read_chunk():
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.WRITE:
+            #if not self.write_chunk():
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.CONTENTS:
-            #self.get_contents()
+            #if not self.get_contents():
+            #    sock.send(self.m.FAILURE)
+            #sock.send(self.m.SUCCESS)
             pass
 
         elif data == self.m.CHUNKSPACE:
+            #if not self.get_remaining_chunk_space():
+            #    self.sock.send(self.m.FAILURE)
+            #self.sock.send(self.m.SUCCESS)
             pass
 
         else:
             log.warn("Message not recognized")
-        # ========================================
 
     def create_chunk(self, chunk_handle):
         """
@@ -138,7 +148,6 @@ class Chunkserver(ChunkServer):
         except IOError:
             log.error("IOError when trying to create chunk " + str(chunk_handle))
             return False
-
 
     def append_chunk(self, chunk_handle, data):
         """
@@ -158,6 +167,12 @@ class Chunkserver(ChunkServer):
         Deletes a chunk from the chunkstore
         """
         os.remove(config.chunkstore + str(chunk_handle))
+
+    def write_chunk(self):
+        """
+        Write data to a chunk
+        """
+        pass
 
     def get_contents(self):
         """
