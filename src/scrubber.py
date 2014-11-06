@@ -10,10 +10,10 @@ Created on Aug 13, 2014
 import logging
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("heartbeat_logger")
+log = logging.getLogger("scrubber_logger")
 
 
-class Scrubber():
+class Scrubber:
     """
     A garbage collection class. Cleans up the metadata structures periodically for files
     which have been marked for deletion.

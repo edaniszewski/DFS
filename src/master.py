@@ -34,14 +34,21 @@ class Master(MasterServer):
     to persist global state.
     """
 
-    def __init__(self):
-        MasterServer.__init__(self)
+    def __init__(self, run=False):
+        """
+        Constructor
+
+        :param run: Flag for debug, defaults to False. If True, skips initialization and server starting
+        :return:
+        """
+        super(Master, self).__init__()
         self.m = Message()
         self.currentChunk = None
         self.gs = None
-        self.initialize_master()
-        self.initialize_heart_beat_listener()
-        self.run()
+        if not run:
+            self.initialize_master()
+            self.initialize_heart_beat_listener()
+            self.run()
 
     def initialize_master(self):
         """
@@ -349,6 +356,5 @@ class Master(MasterServer):
     def sanitize(self):
         pass
 
-# FIXME: this is a temporary addition for quick testing until unit tests are written
 if __name__ == "__main__":
     master = Master()

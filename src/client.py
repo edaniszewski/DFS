@@ -8,7 +8,7 @@ import socket
 import config
 
 
-class Client(object):
+class Client:
     """
     User-end client
     """

@@ -30,7 +30,7 @@ class Chunkserver(ChunkServer):
     """
 
     def __init__(self):
-        ChunkServer.__init__(self)
+        super(Chunkserver, self).__init__()
         self.check_chunkstore()
         self.heartbeat = HeartbeatClient()
         self.m = Message()

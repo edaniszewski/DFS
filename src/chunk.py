@@ -9,7 +9,7 @@ Created on Aug 13, 2014
 import config
 
 
-class Chunk(object):
+class Chunk:
     """
     Contains the metadata associated with a chunk.
     """

@@ -84,7 +84,7 @@ class HeartbeatListener(threading.Thread):
     """
 
     def __init__(self):
-        threading.Thread.__init__(self)
+        super(HeartbeatListener, self).__init__()
         self.hbdict = HeartbeatDict()
         self.sock = None
 
@@ -118,7 +118,7 @@ class HeartbeatClient(UDP):
     """
 
     def __init__(self):
-        UDP.__init__(self)
+        super(HeartbeatClient, self).__init__()
         self.msg = "<3"
 
     def ping(self):

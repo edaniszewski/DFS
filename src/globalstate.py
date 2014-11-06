@@ -18,7 +18,7 @@ from chunk import Chunk
 import config
 
 
-class GlobalState(object):
+class GlobalState:
     """
     Contains important global state, including the chunkHandle incrementor
     """
