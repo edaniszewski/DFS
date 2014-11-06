@@ -36,19 +36,18 @@ class UDP:
         s.bind((config.heartbeat_host, config.heartbeat_port))
         return s
 
-
     def send(self, sock, data):
         """
         Send data over a given socket
         """
         sock.sendto(data, (config.heartbeat_host, config.heartbeat_port))
 
-
     def receive(self, sock):
         """
         Receive data from a socket connection
         """
-        # TODO: This is just a dummy receive for now. Will need to implement a real one once protocol is further developed.
+        # TODO: This is just a dummy receive for now. Will need to implement a real one once
+        # protocol is further developed.
         data = sock.recv(2048)
         return data
 

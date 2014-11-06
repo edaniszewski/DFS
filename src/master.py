@@ -37,6 +37,8 @@ class Master(MasterServer):
     def __init__(self):
         MasterServer.__init__(self)
         self.m = Message()
+        self.currentChunk = None
+        self.gs = None
         self.initialize_master()
         self.initialize_heart_beat_listener()
         self.run()
@@ -183,7 +185,7 @@ class Master(MasterServer):
 
     def load_global_state(self):
         """
-        Load in a pickled gloabal state (from meta.snapshot resource)
+        Load in a pickled global state (from meta.snapshot resource)
         """
         state = pickle.load(open(config.metasnapshot, 'rb'))
         # If nothing was loaded in, create a new instance of GlobalState
@@ -330,7 +332,7 @@ class Master(MasterServer):
                 active_hosts.remove(host)
 
             # Choose new locations for the chunk
-            for num in amnt_of_locs_needed:
+            for num in range(amnt_of_locs_needed):
                 loc = choice(active_hosts)
                 new_locations.append(loc)
                 active_hosts.remove(loc)
