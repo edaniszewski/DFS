@@ -4,9 +4,9 @@ Created on Aug 14, 2014
 @author: erickdaniszewski
 """
 import unittest
-from meta.globalstate import GlobalState
-from file import File
-from chunk import Chunk
+from src.globalstate import GlobalState
+from src.file import File
+from src.chunk import Chunk
 
 
 class Test(unittest.TestCase):

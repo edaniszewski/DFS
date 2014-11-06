@@ -19,7 +19,7 @@ import threading
 import config
 from net import MasterServer
 from message import Message
-from meta.globalstate import GlobalState
+from src.globalstate import GlobalState
 import heartbeat
 
 
