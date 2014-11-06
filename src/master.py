@@ -19,7 +19,7 @@ import threading
 import config
 from net import MasterServer
 from message import Message
-from src.globalstate import GlobalState
+from globalstate import GlobalState
 import heartbeat
 
 
@@ -146,9 +146,9 @@ class Master(MasterServer):
 
         @return: Chunk object
         """
-        if self.gs.chunkHandle == 0:
+        if self.gs._chunk_handle == 0:
             self.gs.add_chunk(self.gs.increment_and_get_chunk_handle())
-        return self.gs.get_chunk(self.gs.chunkHandle)
+        return self.gs.get_chunk(self.gs._chunk_handle)
 
     def state_snapshot(self):
         """
@@ -187,12 +187,16 @@ class Master(MasterServer):
         """
         Load in a pickled global state (from meta.snapshot resource)
         """
-        state = pickle.load(open(config.metasnapshot, 'rb'))
-        # If nothing was loaded in, create a new instance of GlobalState
-        if not state:
+        try:
+            return pickle.load(open(config.metasnapshot, 'rb'))
+        except:
             return GlobalState()
+
+        # If nothing was loaded in, create a new instance of GlobalState
+        #if not state:
+        #    return GlobalState()
         # Otherwise, return the loaded state
-        return state
+        #return state
 
     def restore_state(self):
         """
