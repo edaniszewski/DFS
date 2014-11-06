@@ -34,10 +34,12 @@ class Chunkserver(ChunkServer):
         self.check_chunkstore()
         self.heartbeat = HeartbeatClient()
         self.m = Message()
+        self.chunk_set = set()
         self.start_heartbeat()
         self.run()
 
-    def check_chunkstore(self):
+    @staticmethod
+    def check_chunkstore():
         """
         Create the chunkstore directory if it does not yet exist
         """
@@ -129,7 +131,14 @@ class Chunkserver(ChunkServer):
         """
         Create a file that will be the chunk
         """
-        open(config.chunkstore + str(chunk_handle), 'w').close()
+        try:
+            open(config.chunkstore + str(chunk_handle), 'w').close()
+            self.chunk_set.add(str(chunk_handle))
+            return True
+        except IOError:
+            log.error("IOError when trying to create chunk " + str(chunk_handle))
+            return False
+
 
     def append_chunk(self, chunk_handle, data):
         """
@@ -149,6 +158,19 @@ class Chunkserver(ChunkServer):
         Deletes a chunk from the chunkstore
         """
         os.remove(config.chunkstore + str(chunk_handle))
+
+    def get_contents(self):
+        """
+        Returns a list of the chunks that are stored on the chunkserver
+        """
+        # TODO: Figure out implementation and what will be returned when asked for contents
+        return self.chunk_set
+
+    def get_remaining_chunk_space(self):
+        """
+        Calculate and return the amount of available space left on a chunkserver
+        """
+        pass
 
 
 if __name__ == "__main__":
