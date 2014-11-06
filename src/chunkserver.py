@@ -33,6 +33,7 @@ class Chunkserver(ChunkServer):
         ChunkServer.__init__(self)
         self.check_chunkstore()
         self.heartbeat = HeartbeatClient()
+        self.m = Message()
         self.start_heartbeat()
         self.run()
 
@@ -86,7 +87,6 @@ class Chunkserver(ChunkServer):
         Method to handle incoming requests to the chunkserver
         """
         log.info(threading.current_thread().name)
-        m = Message()
         data = sock.recv(1024)
 
         # ========================================
@@ -95,34 +95,35 @@ class Chunkserver(ChunkServer):
         #
         # ========================================
 
-        if data == m.CREATE:
+        if data == self.m.CREATE:
             #self.create_chunk(chunkHandle)
             pass
 
-        elif data == m.APPEND:
+        elif data == self.m.APPEND:
             #self.append_chunk()
             pass
 
-        elif data == m.DELETE:
+        elif data == self.m.DELETE:
             #self.delete_chunk(chunkHandle)
             pass
 
-        elif data == m.READ:
+        elif data == self.m.READ:
             #self.read_chunk()
             pass
 
-        elif data == m.WRITE:
+        elif data == self.m.WRITE:
             pass
 
-        elif data == m.CONTENTS:
+        elif data == self.m.CONTENTS:
+            #self.get_contents()
             pass
 
-        elif data == m.CHUNKSPACE:
+        elif data == self.m.CHUNKSPACE:
             pass
 
         else:
             log.warn("Message not recognized")
-            #========================================
+        # ========================================
 
     def create_chunk(self, chunk_handle):
         """

@@ -36,6 +36,7 @@ class Master(MasterServer):
 
     def __init__(self):
         MasterServer.__init__(self)
+        self.m = Message()
         self.initialize_master()
         self.initialize_heart_beat_listener()
         self.run()
@@ -88,7 +89,6 @@ class Master(MasterServer):
         is parsed and delegated out accordingly.
         """
         log.info(threading.current_thread().name)
-        m = Message()
         data = sock.recv(1024)
 
         # ========================================
@@ -97,36 +97,36 @@ class Master(MasterServer):
         #
         #========================================
 
-        if data == m.APPEND:
+        if data == self.m.APPEND:
             #self.append(fileName, appendSize)
             pass
 
-        elif data == m.READ:
+        elif data == self.m.READ:
             #self.read()
             pass
 
-        elif data == m.SANITIZE:
+        elif data == self.m.SANITIZE:
             #self.sanitize()
             pass
 
-        elif data == m.DELETE:
+        elif data == self.m.DELETE:
             #self.delete()
             pass
 
-        elif data == m.UNDELETE:
+        elif data == self.m.UNDELETE:
             #self.undelete()
             pass
 
-        elif data == m.CREATE:
+        elif data == self.m.CREATE:
             pass
 
-        elif data == m.OPEN:
+        elif data == self.m.OPEN:
             pass
 
-        elif data == m.CLOSE:
+        elif data == self.m.CLOSE:
             pass
 
-        elif data == m.WRITE:
+        elif data == self.m.WRITE:
             pass
 
         else:

@@ -15,14 +15,16 @@ class Message:
     """
 
     def __init__(self):
-        self.READ = 1
-        self.APPEND = 2
-        self.DELETE = 3
-        self.UNDELETE = 4
-        self.SANITIZE = 5
-        self.CREATE = 6
-        self.OPEN = 7
-        self.CLOSE = 8
-        self.WRITE = 9
-        self.CONTENTS = 10
-        self.CHUNKSPACE = 11
+        self.SUCCESS = 0
+        self.FAILURE = 1
+        self.READ = 2
+        self.APPEND = 3
+        self.DELETE = 4
+        self.UNDELETE = 5
+        self.SANITIZE = 6
+        self.CREATE = 7
+        self.OPEN = 8
+        self.CLOSE = 9
+        self.WRITE = 10
+        self.CONTENTS = 11
+        self.CHUNKSPACE = 12
