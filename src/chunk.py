@@ -6,6 +6,8 @@ Created on Aug 13, 2014
 
 @author: erickdaniszewski
 """
+from threading import Lock
+
 import config
 
 
@@ -15,9 +17,10 @@ class Chunk:
     """
 
     def __init__(self, chunk_handle, chunkserver_locations=[]):
-        self.chunkHandle = chunk_handle
+        self.chunk_handle = chunk_handle
         self.chunkserver_locations = chunkserver_locations
         self.offset = 0
+        self.lock = Lock()
 
     def check_remaining_size(self, size_to_append):
         """
@@ -26,3 +29,13 @@ class Chunk:
         if (self.offset + size_to_append) > config.chunk_size:
             return False
         return True
+
+    def update_offset(self, size):
+        """
+        Updates the offset of the chunk. This method is locked to prevent asynchronous overwrites
+
+        :param size:
+        :return:
+        """
+        with self.lock:
+            self.offset += size
