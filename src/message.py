@@ -11,12 +11,12 @@ Created on Oct 31, 2014
 
 class Message:
     """
-    Byte-size message codes for system wide communications
+    Message codes for intra-system communications
     """
 
     def __init__(self):
-        self.SUCCESS = 0
-        self.FAILURE = 1
+        self.FAILURE = 0
+        self.SUCCESS = 1
         self.READ = 2
         self.APPEND = 3
         self.DELETE = 4
