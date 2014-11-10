@@ -35,6 +35,8 @@ class Chunkserver(ChunkServer):
         self.heartbeat = HeartbeatClient()
         self.m = Message()
         self.chunk_set = set()
+        self.rLock = threading.Lock()
+        self.wLock = threading.Lock()
         self.start_heartbeat()
         self.run()
 
@@ -153,20 +155,39 @@ class Chunkserver(ChunkServer):
         """
         Append data to a specified chunk
         """
-        with open(config.chunkstore + str(chunk_handle), 'a') as f:
-            f.write(data)
+        try:
+            with self.wLock:
+                with open(config.chunkstore + str(chunk_handle), 'a') as f:
+                    f.write(data)
+                return True
+        except IOError:
+            log.error("Unable to append data to chunk " + str(chunk_handle))
+            return False
 
-    def read_chunk(self, chunk_handle):
+    def read_chunk(self, chunk_handle, offset, size):
         """
         Read from a specified chunk
         """
-        pass
+        try:
+            with self.rLock:
+                with open(config.chunkstore + str(chunk_handle), 'r') as f:
+                    f.seek(offset)
+                    data = f.read(size)
+                return data
+        except IOError:
+            log.error("Unable to read data from chunk " + str(chunk_handle))
+            return False
 
     def delete_chunk(self, chunk_handle):
         """
         Deletes a chunk from the chunkstore
         """
-        os.remove(config.chunkstore + str(chunk_handle))
+        try:
+            os.remove(config.chunkstore + str(chunk_handle))
+            return True
+        except IOError:
+            log.error("Unable to delete chunk " + str(chunk_handle))
+            return False
 
     def write_chunk(self):
         """
