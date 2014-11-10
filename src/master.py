@@ -98,7 +98,7 @@ class Master(MasterServer):
         is parsed and delegated out accordingly.
         """
         log.info(threading.current_thread().name)
-        data = sock.recv(1024)
+        sysmsg = self.recv(sock)
 
         # ========================================
         #
@@ -106,36 +106,36 @@ class Master(MasterServer):
         #
         #========================================
 
-        if data == self.m.APPEND:
+        if sysmsg == self.m.APPEND:
             #self.append(fileName, appendSize)
             pass
 
-        elif data == self.m.READ:
+        elif sysmsg == self.m.READ:
             #self.read()
             pass
 
-        elif data == self.m.SANITIZE:
+        elif sysmsg == self.m.SANITIZE:
             #self.sanitize()
             pass
 
-        elif data == self.m.DELETE:
+        elif sysmsg == self.m.DELETE:
             #self.delete()
             pass
 
-        elif data == self.m.UNDELETE:
+        elif sysmsg == self.m.UNDELETE:
             #self.undelete()
             pass
 
-        elif data == self.m.CREATE:
+        elif sysmsg == self.m.CREATE:
             pass
 
-        elif data == self.m.OPEN:
+        elif sysmsg == self.m.OPEN:
             pass
 
-        elif data == self.m.CLOSE:
+        elif sysmsg == self.m.CLOSE:
             pass
 
-        elif data == self.m.WRITE:
+        elif sysmsg == self.m.WRITE:
             pass
 
         else:

@@ -11,6 +11,7 @@ Created on Aug 13, 2014
 import os
 import threading
 import logging
+import struct
 
 import config
 from heartbeat import HeartbeatClient
@@ -90,50 +91,52 @@ class Chunkserver(ChunkServer):
         """
         Method to handle incoming requests to the chunkserver
         """
-        log.info(threading.current_thread().name)
-        data = sock.recv(1024)
+        log.info("Handling request for thread " + threading.current_thread().name)
+        sysmsg = self.recv(sock)
 
-        # TODO: Implement parsing and delegation
-        if data == self.m.CREATE:
-            #if not self.create_chunk(chunkHandle):
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
-            pass
+        if sysmsg == self.m.CREATE:
+            chunk_handle = struct.unpack("!L", self.recv(sock))[0]
+            if not self.create_chunk(chunk_handle):
+                self.send(sock, self.m.FAILURE)
+            self.send(sock, self.m.SUCCESS)
 
-        elif data == self.m.APPEND:
+        elif sysmsg == self.m.APPEND:
+            # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.append_chunk():
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
+            #    self.send(sock, self.m.FAILURE)
+            #self.send(sock, self.m.SUCCESS)
             pass
 
-        elif data == self.m.DELETE:
-            #if not self.delete_chunk(chunkHandle):
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
-            pass
+        elif sysmsg == self.m.DELETE:
+            chunk_handle = struct.unpack("!L", self.recv(sock))[0]
+            if not self.delete_chunk(chunk_handle):
+                self.send(sock, self.m.FAILURE)
+            self.send(sock, self.m.SUCCESS)
 
-        elif data == self.m.READ:
+        elif sysmsg == self.m.READ:
+            # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.read_chunk():
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
+            #    self.send(sock, self.m.FAILURE)
+            #self.send(sock, self.m.SUCCESS)
             pass
 
-        elif data == self.m.WRITE:
+        elif sysmsg == self.m.WRITE:
+            # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.write_chunk():
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
+            #    self.send(sock, self.m.FAILURE)
+            #self.send(sock, self.m.SUCCESS)
             pass
 
         elif data == self.m.CONTENTS:
             #if not self.get_contents():
-            #    sock.send(self.m.FAILURE)
-            #sock.send(self.m.SUCCESS)
+            #    self.send(sock, self.m.FAILURE)
+            #self.send(sock, self.m.SUCCESS)
             pass
 
-        elif data == self.m.CHUNKSPACE:
+        elif sysmsg == self.m.CHUNKSPACE:
             #if not self.get_remaining_chunk_space():
-            #    self.sock.send(self.m.FAILURE)
-            #self.sock.send(self.m.SUCCESS)
+            #    self.send(sock, self.m.FAILURE)
+            #self.send(sock, self.m.SUCCESS)
             pass
 
         else:
