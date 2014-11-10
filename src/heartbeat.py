@@ -20,6 +20,7 @@ import logging
 
 import config
 from net import UDP
+from message import Message
 
 
 logging.basicConfig(level=logging.INFO)
@@ -87,6 +88,7 @@ class HeartbeatListener(threading.Thread):
         super(HeartbeatListener, self).__init__()
         self.hbdict = HeartbeatDict()
         self.sock = None
+        self.m = Message()
 
     def initialize_socket(self):
         try:
@@ -105,7 +107,7 @@ class HeartbeatListener(threading.Thread):
         while True:
             try:
                 data, addr = self.sock.recvfrom(8)
-                if data == "<3":
+                if data == self.m.HEARTBEAT:
                     self.hbdict[addr[0]] = time.time()
             except socket.timeout:
                 pass
@@ -119,13 +121,13 @@ class HeartbeatClient(UDP):
 
     def __init__(self):
         super(HeartbeatClient, self).__init__()
-        self.msg = "<3"
+        self.m = Message()
 
     def ping(self):
         """
         Ping the heartbeat listener
         """
-        self.send(self.socket, self.msg)
+        self.send(self.socket, self.m.HEARTBEAT)
 
     def ping_forever(self):
         """
@@ -136,10 +138,6 @@ class HeartbeatClient(UDP):
             time.sleep(config.beat_period)
 
 
-def main():
+if __name__ == '__main__':
     listener = HeartbeatListener()
     listener.start()
-
-
-if __name__ == '__main__':
-    main()

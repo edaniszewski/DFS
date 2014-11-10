@@ -28,3 +28,4 @@ class Message:
         self.WRITE = 10
         self.CONTENTS = 11
         self.CHUNKSPACE = 12
+        self.HEARTBEAT = 13
