@@ -8,7 +8,7 @@ Created on Aug 13, 2014
 """
 
 
-class File:
+class File(object):
     """
     Contains the metadata associated with a file.
     """

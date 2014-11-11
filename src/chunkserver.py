@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("chunkserver_logger")
 
 
-class Chunkserver(ChunkServer):
+class Chunkserver(object, ChunkServer):
     """
     A server that holds the chunks that are the system storage unit. In addition to
     keeping handling the data that is associated with chunks, it provides chunk metadata
@@ -45,6 +45,8 @@ class Chunkserver(ChunkServer):
     def check_chunkstore():
         """
         Create the chunkstore directory if it does not yet exist
+
+        :rtype : object
         """
         log.info("Checking chunk storage")
 
@@ -57,6 +59,8 @@ class Chunkserver(ChunkServer):
     def start_heartbeat(self):
         """
         Broadcast a heartbeat message
+
+        :rtype : object
         """
         log.info("Starting chunkserver heartbeat")
 
@@ -70,6 +74,8 @@ class Chunkserver(ChunkServer):
         """
         Run the server. Initializes a socket and listens over it. Each incoming request is passed
         to a handler thread.
+
+        :rtype : object
         """
         log.info("Running chunkserver")
 
@@ -90,16 +96,22 @@ class Chunkserver(ChunkServer):
     def handle(self, sock, address):
         """
         Method to handle incoming requests to the chunkserver
+
+        :rtype : object
+        :param sock: 
+        :param address: 
         """
         log.info("Handling request for thread " + threading.current_thread().name)
         sysmsg = self.recv(sock)
 
+        # Request to create a new chunk
         if sysmsg == self.m.CREATE:
             chunk_handle = struct.unpack("!L", self.recv(sock))[0]
             if not self.create_chunk(chunk_handle):
                 self.send(sock, self.m.FAILURE)
             self.send(sock, self.m.SUCCESS)
 
+        # Request to append data to an existing chunk
         elif sysmsg == self.m.APPEND:
             # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.append_chunk():
@@ -107,12 +119,14 @@ class Chunkserver(ChunkServer):
             #self.send(sock, self.m.SUCCESS)
             pass
 
+        # Request to permanently delete a chunk from the system
         elif sysmsg == self.m.DELETE:
             chunk_handle = struct.unpack("!L", self.recv(sock))[0]
             if not self.delete_chunk(chunk_handle):
                 self.send(sock, self.m.FAILURE)
             self.send(sock, self.m.SUCCESS)
 
+        # Request to read from a chunk
         elif sysmsg == self.m.READ:
             # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.read_chunk():
@@ -120,6 +134,7 @@ class Chunkserver(ChunkServer):
             #self.send(sock, self.m.SUCCESS)
             pass
 
+        # Request to write to a chunk
         elif sysmsg == self.m.WRITE:
             # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.write_chunk():
@@ -127,12 +142,14 @@ class Chunkserver(ChunkServer):
             #self.send(sock, self.m.SUCCESS)
             pass
 
-        elif data == self.m.CONTENTS:
-            #if not self.get_contents():
-            #    self.send(sock, self.m.FAILURE)
-            #self.send(sock, self.m.SUCCESS)
-            pass
+        # Request for chunks managed by the chunkserver
+        elif sysmsg == self.m.CONTENTS:
+            contents = self.get_contents()
+            if not contents:
+                self.send(sock, self.m.FAILURE)
+            self.send(sock, contents)
 
+        # Request for the amount of chunkstore space is left on the chunkserver
         elif sysmsg == self.m.CHUNKSPACE:
             #if not self.get_remaining_chunk_space():
             #    self.send(sock, self.m.FAILURE)
@@ -145,6 +162,9 @@ class Chunkserver(ChunkServer):
     def create_chunk(self, chunk_handle):
         """
         Create a file that will be the chunk
+
+        :rtype : object
+        :param chunk_handle: 
         """
         try:
             open(config.chunkstore + str(chunk_handle), 'w').close()
@@ -157,6 +177,10 @@ class Chunkserver(ChunkServer):
     def append_chunk(self, chunk_handle, data):
         """
         Append data to a specified chunk
+
+        :rtype : object
+        :param chunk_handle: 
+        :param data: 
         """
         try:
             with self.wLock:
@@ -170,6 +194,11 @@ class Chunkserver(ChunkServer):
     def read_chunk(self, chunk_handle, offset, size):
         """
         Read from a specified chunk
+
+        :rtype : object
+        :param chunk_handle:
+        :param offset:
+        :param size:
         """
         try:
             with self.rLock:
@@ -181,9 +210,13 @@ class Chunkserver(ChunkServer):
             log.error("Unable to read data from chunk " + str(chunk_handle))
             return False
 
-    def delete_chunk(self, chunk_handle):
+    @staticmethod
+    def delete_chunk(chunk_handle):
         """
         Deletes a chunk from the chunkstore
+
+        :rtype : object
+        :param chunk_handle:
         """
         try:
             os.remove(config.chunkstore + str(chunk_handle))
@@ -195,12 +228,16 @@ class Chunkserver(ChunkServer):
     def write_chunk(self):
         """
         Write data to a chunk
+
+        :rtype : object
         """
         pass
 
     def get_contents(self):
         """
         Returns a list of the chunks that are stored on the chunkserver
+
+        :rtype : object
         """
         # TODO: Figure out implementation and what will be returned when asked for contents
         return self.chunk_set
@@ -208,6 +245,8 @@ class Chunkserver(ChunkServer):
     def get_remaining_chunk_space(self):
         """
         Calculate and return the amount of available space left on a chunkserver
+
+        :rtype : object
         """
         pass
 

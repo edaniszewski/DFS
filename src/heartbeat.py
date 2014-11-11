@@ -46,6 +46,10 @@ class HeartbeatDict(dict):
     def __setitem__(self, key, value):
         """
         Add an item to the dictionary, or update an entry if it already exists.
+
+        :rtype : object
+        :param key:
+        :param value:
         """
         with self._rwLock:
             super(HeartbeatDict, self).__setitem__(key, value)
@@ -55,6 +59,8 @@ class HeartbeatDict(dict):
         Returns a two-tuple of lists of dictionary entries. The 0th element in the
         tuple is a list of all active IPs. The 1st element is a list of IPs that have a
         time stamp older than a threshold amount (inactive IPs).
+
+        :rtype : object
         """
         #A time limit. Anything less than the time limit is stale, anything greater is still fresh
         stale_time = time.time() - config.heartbeat_fresh_period
@@ -72,8 +78,10 @@ class HeartbeatDict(dict):
         """
         Update the list of active hosts within the system. First, remove any hosts that are stale,
         then add any new hosts to activehosts.
+
+        :rtype : object
         """
-        results = self.get_entries()
+        results = self.get_entries
         self.activeHosts.remove([stale_entry for stale_entry in results[1] if stale_entry in self.activeHosts])
         self.activeHosts = set(self.activeHosts.extend(results[0]))
 
@@ -91,6 +99,11 @@ class HeartbeatListener(threading.Thread):
         self.m = Message()
 
     def initialize_socket(self):
+        """
+        Initialize the heartbeat listener server
+
+        :rtype : object
+        """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.settimeout(config.heartbeat_timeout)
@@ -102,6 +115,11 @@ class HeartbeatListener(threading.Thread):
             log.error("Could not initialize heartbeat listener socket")
 
     def run(self):
+        """
+        Initialize and run the heartbeat listener server
+
+        :rtype : object
+        """
         self.initialize_socket()
 
         while True:
@@ -113,7 +131,7 @@ class HeartbeatListener(threading.Thread):
                 pass
 
 
-class HeartbeatClient(UDP):
+class HeartbeatClient(object, UDP):
     """
     A class each chunkserver will instantiate in order to send heartbeat messages to the
     HeartbeatListener
@@ -126,12 +144,16 @@ class HeartbeatClient(UDP):
     def ping(self):
         """
         Ping the heartbeat listener
+
+        :rtype : object
         """
         self.send(self.socket, self.m.HEARTBEAT)
 
     def ping_forever(self):
         """
         Pings out to the heartbeat listener forever
+
+        :rtype : object
         """
         while True:
             self.ping()

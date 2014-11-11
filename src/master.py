@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("master_logger")
 
 
-class Master(MasterServer):
+class Master(object, MasterServer):
     """
     Centralized administrator of system metadata. Initiates a global state to
     track the adding and updating of Chunks and Files. Includes (or will include) methods
@@ -53,19 +53,23 @@ class Master(MasterServer):
     def initialize_master(self):
         """
         Executes a sequence of methods in order to properly set up the master server
+
+        :rtype : None
         """
         log.info("Initializing master...")
 
         self.check_resources()
         self.restore_state()
         # FIXME: This is only the case for initial start up. Need to also handle the case when the server is reset
-        self.currentChunk = self.get_current_chunk()
+        self.currentChunk = self.get_current_chunk
 
         log.info("Master initialized successfully")
 
     def initialize_heart_beat_listener(self):
         """
         Initialize an instance of the heartbeat listener
+
+        :rtype : None
         """
         log.info("Initializing heartbeat listener...")
 
@@ -79,6 +83,8 @@ class Master(MasterServer):
         """
         Run the server. Initializes a socket and listens over it. Each incoming request is passed
         to a handler thread.
+
+        :rtype : object
         """
         log.info("Running master server")
         self.initialize_socket()
@@ -96,6 +102,10 @@ class Master(MasterServer):
         """
         Method called by the run method when the server receives an incoming request. The request
         is parsed and delegated out accordingly.
+
+        :rtype : object
+        :param sock:
+        :param address:
         """
         log.info(threading.current_thread().name)
         sysmsg = self.recv(sock)
@@ -151,7 +161,7 @@ class Master(MasterServer):
         Gets the most recent chunk in the system. If initial start up,
         it first creates a chunk.
 
-        @return: Chunk object
+        :rtype : object
         """
         if self.gs._chunk_handle == 0:
             self.gs.add_chunk(self.gs.increment_and_get_chunk_handle())
@@ -160,6 +170,8 @@ class Master(MasterServer):
     def state_snapshot(self):
         """
         Take a snapshot of the metadata and persist it to disk
+
+        :rtype : object
         """
         # FIXME: Instead of replacing the previous snapshot, could have snapshots be incremental or
         # timestamped, and persist them in their own directory. This could allow you to return to 
@@ -177,6 +189,8 @@ class Master(MasterServer):
             - active hosts file: persisted list of hosts
             - oplog file: persisted log of operations executed
             - metadata snapshot: a snapshot of the global metadata
+
+        :rtype : object
         """
         if not os.path.isfile(config.activehosts):
             open(config.activehosts, 'w').close()
@@ -193,6 +207,8 @@ class Master(MasterServer):
     def load_global_state(self):
         """
         Load in a pickled global state (from meta.snapshot resource)
+
+        :rtype : object
         """
         try:
             return pickle.load(open(config.metasnapshot, 'rb'))
@@ -210,6 +226,8 @@ class Master(MasterServer):
         Restore the master's global state to a previously pickled state. If loading in a
         pickled state was unsuccessful or there was no pickled snapshot to load in, restore_state()
         will instantiate a new instance of GlobalState.
+
+        :rtype : object
         """
         self.gs = self.load_global_state()
 
@@ -218,12 +236,17 @@ class Master(MasterServer):
         When a chunk is filled, a new chunk will need to be created and
         the current chunk will need to be updated to the newly created chunk
         so further appends may continue.
+
+        :rtype : object
         """
         pass
 
     def create_new_file(self, file_name):
         """
         Instantiate a new File object
+
+        :rtype : object
+        :param file_name:
         """
         self.gs.addFile(file_name)
 
@@ -231,6 +254,8 @@ class Master(MasterServer):
         """
         On CREATE or APPEND, master will create a new metadata Chunk
         Object to track the new chunk.
+
+        :rtype : object
         """
         chunk_handle = self.gs.incrementAndGetChunkHandle()
         self.gs.addChunk(chunk_handle)
@@ -239,6 +264,10 @@ class Master(MasterServer):
         """
         When a new file is created, it needs to be associated with the
         chunk(s) that contain its data
+
+        :rtype : object
+        :param chunk_handle:
+        :param file_name:
         """
         f = self.gs.getFile(file_name)
         f.chunkHandles.append(chunk_handle)
@@ -246,6 +275,10 @@ class Master(MasterServer):
     def append(self, file_name, append_size):
         """
         Retrieves metadata necessary for an append to occur
+
+        :rtype : object
+        :param file_name:
+        :param append_size:
         """
         current_chunk = self.currentChunk
         if current_chunk.offset + append_size < config.chunk_size:
@@ -254,56 +287,87 @@ class Master(MasterServer):
             log.info("Can not append -- not enough space in chunk")
 
     def read(self):
+        """
+
+        :rtype : object
+        """
         pass
 
     def delete(self):
+        """
+
+        :rtype : object
+        """
         pass
 
     def undelete(self):
+        """
+
+        :rtype : object
+        """
         pass
 
     def append_lock(self):
         """
         Get a thread lock on a chunk to initiate a synchronous append on the chunk
+
+        :rtype : object
         """
         pass
 
     def append_unlock(self):
         """
         Remove the thread lock on a chunk to allow other threads append access to the chunk
+
+        :rtype : object
         """
         pass
 
     def read_lock(self):
         """
         Get a thread lock on a chink to initiate a synchronous read on the chunk
+
+        :rtype : object
         """
         pass
 
     def read_unlock(self):
         """
         Remove the thread lock on a chunk to allow other threads read access to the chunk
+
+        :rtype : object
         """
         pass
 
     def is_append_locked(self):
         """
         Check to see if a chunk has an active append lock
+
+        :rtype : object
         """
         pass
 
     def is_read_locked(self):
         """
         Check to see if a chunk has an active read lock
+
+        :rtype : object
         """
         pass
 
     def delete_chunk(self):
+        """
+
+        :rtype : object
+        """
         pass
 
     def is_chunk_empty(self, chunk):
         """
         Check if a given chunk contains any data
+
+        :rtype : object
+        :param chunk:
         """
         if chunk.offset() == 0:
             return True
@@ -312,12 +376,18 @@ class Master(MasterServer):
     def get_chunk_locations(self, chunk_handle):
         """
         Get the current locations that a chunk is stored at
+
+        :rtype : object
+        :param chunk_handle:
         """
         return self.gs.chunk_map[chunk_handle].chunkserverLocations
 
     def number_of_replicas(self, chunk_handle):
         """
         Get the current number of replicas of a specified chunk
+
+        :rtype : object
+        :param chunk_handle:
         """
         return len(self.get_chunk_locations(chunk_handle))
 
@@ -325,6 +395,9 @@ class Master(MasterServer):
         """
         Choose locations for a chunk to be stored. Currently there is no
         load balancing in place to determine which chunkservers get chunks
+
+        :rtype : object
+        :param chunk_handle:
         """
         # TODO: Implement load balancing
 
@@ -351,9 +424,17 @@ class Master(MasterServer):
             return new_locations
 
     def replicate_chunk(self):
+        """
+
+        :rtype : object
+        """
         pass
 
     def sanitize(self):
+        """
+
+        :rtype : object
+        """
         pass
 
 if __name__ == "__main__":

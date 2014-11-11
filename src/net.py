@@ -29,6 +29,10 @@ class BaseServer:
     def send(self, socket, data):
         """
         Send method which first sends the length of the data
+
+        :rtype : object
+        :param socket:
+        :param data:
         """
         data_length = len(data)
         socket.send(self.struct.pack(data_length))
@@ -43,6 +47,9 @@ class BaseServer:
     def recv(self, socket):
         """
         Receive method which first gets the length of the file to receive
+
+        :rtype : object
+        :param socket:
         """
         data = ""
         data_length = self.struct.unpack(socket.recv(4))[0]
@@ -64,6 +71,8 @@ class UDP:
         """
         Create a new socket object, connect to the given host on the given port
         and return the socket object
+
+        :rtype : object
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(config.heartbeat_timeout)
@@ -74,12 +83,19 @@ class UDP:
     def send(self, sock, data):
         """
         Send data over a given socket
+
+        :rtype : object
+        :param sock:
+        :param data:
         """
         sock.sendto(data, (config.heartbeat_host, config.heartbeat_port))
 
     def receive(self, sock):
         """
         Receive data from a socket connection
+
+        :rtype : object
+        :param sock:
         """
         # TODO: This is just a dummy receive for now. Will need to implement a real one once
         # protocol is further developed.
@@ -106,6 +122,8 @@ class ChunkServer(BaseServer):
         """
         Initializes and binds a socket for the server on the host and port specified
         in the configuration file.
+
+        :rtype : object
         """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -136,6 +154,8 @@ class MasterServer(BaseServer):
         """
         Initializes and binds a socket for the server on the host and port specified
         in the configuration file.
+
+        :rtype : object
         """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

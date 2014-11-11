@@ -11,7 +11,7 @@ from threading import Lock
 import config
 
 
-class Chunk:
+class Chunk(object):
     """
     Contains the metadata associated with a chunk.
     """
@@ -25,6 +25,9 @@ class Chunk:
     def check_remaining_size(self, size_to_append):
         """
         Checks if a given size will fit on the chunk
+
+        :rtype : object
+        :param size_to_append:
         """
         if (self.offset + size_to_append) > config.chunk_size:
             return False
@@ -34,8 +37,8 @@ class Chunk:
         """
         Updates the offset of the chunk. This method is locked to prevent asynchronous overwrites
 
+        :rtype : object
         :param size:
-        :return:
         """
         with self.lock:
             self.offset += size

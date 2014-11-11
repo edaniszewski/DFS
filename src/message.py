@@ -9,7 +9,7 @@ Created on Oct 31, 2014
 """
 
 
-class Message:
+class Message(object):
     """
     Message codes for intra-system communications
     """

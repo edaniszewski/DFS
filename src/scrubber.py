@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("scrubber_logger")
 
 
-class Scrubber:
+class Scrubber(object):
     """
     A garbage collection class. Cleans up the metadata structures periodically for files
     which have been marked for deletion.
@@ -41,8 +41,9 @@ class Scrubber:
         """
         Initiates a connection to a specified chunkserver.
 
+        :rtype : object
+        :param retry_count:
         :param addr:
-        :return:
         """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,7 +63,9 @@ class Scrubber:
         """
         Send a delete request to a chunkserver for a specified chunk
 
-        :return:
+        :rtype : object
+        :param addr:
+        :param chunk_handle:
         """
         socket = self.connect_to_chunkserver(addr)
 
@@ -81,6 +84,6 @@ class Scrubber:
         """
         Method to handle the cleaning of all the chunks which are marked for deletion
 
-        :return:
+        :rtype : object
         """
         pass

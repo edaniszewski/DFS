@@ -8,7 +8,7 @@ import socket
 import config
 
 
-class Client:
+class Client(object):
     """
     User-end client
     """
@@ -17,7 +17,14 @@ class Client:
         self.BUF_SIZE = 1024
 
     def client(self, ip, port, message):
-        # Connect to the server
+        """
+        Connect to the server
+
+        :rtype : object
+        :param ip:
+        :param port:
+        :param message:
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((ip, port))
         try:
