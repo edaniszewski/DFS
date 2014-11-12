@@ -48,7 +48,7 @@ class BaseServer:
         """
         Receive method which first gets the length of the file to receive
 
-        :rtype : object
+        :rtype : str
         :param socket:
         """
         data = ""
