@@ -10,33 +10,53 @@ import config
 
 class Client(object):
     """
-    User-end client
+    Client API for the DFS system. Contains the calls to create, delete, undelete, read, append, and snapshot.
     """
-
     def __init__(self):
-        self.BUF_SIZE = 1024
+        pass
 
-    def client(self, ip, port, message):
+    def create(self, file_name):
         """
-        Connect to the server
 
         :rtype : object
-        :param ip:
-        :param port:
-        :param message:
+        :param file_name:
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((ip, port))
-        try:
-            sock.sendall(message)
-            response = sock.recv(self.BUF_SIZE)
-            print "Client received: %s" % response
-        finally:
-            sock.close()
+        pass
 
+    def delete(self, file_name):
+        """
 
-if __name__ == '__main__':
-    client = Client()
+        :param file_name:
+        :rtype : object
+        """
+        pass
 
-    while 1:
-        client.client(config.HOST, config.PORT, raw_input(">"))
+    def undelete(self, file_name):
+        """
+
+        :param file_name:
+        :rtype : object
+        """
+        pass
+
+    def read(self):
+        """
+
+        :rtype : object
+        """
+        pass
+
+    def append(self):
+        """
+
+        :rtype : object
+        """
+        pass
+
+    def snapshot(self):
+        """
+
+        :rtype : object
+        """
+        pass
+

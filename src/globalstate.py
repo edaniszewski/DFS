@@ -24,6 +24,7 @@ class GlobalState(object):
     """
 
     def __init__(self):
+        # FIXME: As per the GFS paper, chunk ids are immutable 64 bit UIDs
         self._chunk_handle = 0
         self.to_delete = set()
         self.file_map = {}

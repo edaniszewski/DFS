@@ -90,6 +90,14 @@ class HeartbeatListener(threading.Thread):
     """
     Listen for heart beat pings from HeartbeatClient classes, which are to be instantiated
     with the chunkservers. Update the HeartbeatDict in accordance with the pings received.
+
+    The GFS paper states:
+        The master periodically communicates with each chunkserver in HeartBeat messages to give it instructions
+        and collect its state.
+
+    In the current implementation, heartbeat messages are only used to collect the state of chunkservers, not to give
+    any instructions. The heartbeat is a one-way message (UDP) from chunkserver to master. Instructions to be passed
+    from the master to the chunkservers are handled by a separate two-way message (TCP) protocol.
     """
 
     def __init__(self):
