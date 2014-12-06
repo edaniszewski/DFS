@@ -142,7 +142,7 @@ class GlobalState(object):
         :rtype : object
         :param filename:
         """
-        associated_chunks = self.file_map[filename].chunkHandles
+        associated_chunks = self.file_map[filename].chunk_handles
 
         for chunk_handle in associated_chunks:
             self.clean_chunk_map(chunk_handle)

@@ -135,7 +135,7 @@ class Chunkserver(object, ChunkServer):
             offset = self.recv(sock)
             size = self.recv(sock)
             data = self.read_chunk(chunk_handle, offset, size)
-            
+
             if not data:
                 self.send(sock, self.m.FAILURE)
             self.send(sock, data)

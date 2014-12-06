@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         pass
 
     def testIncrementChunkHandle(self):        
-        self.assertEqual(0, self.gs.chunkHandle, "initial chunk handle")
+        self.assertEqual(0, self.gs._chunk_handle, "initial chunk handle")
         self.assertEqual(1, self.gs.increment_and_get_chunk_handle(), "incremented chunk handle")
 
     def testAddFile(self):
@@ -34,12 +34,12 @@ class Test(unittest.TestCase):
         
         self.assertEqual(0, len(self.gs.to_delete), "check that filemap is initially empty")
         self.assertTrue(self.gs.queue_delete(self.fileName), "check for proper return code")
-        self.assertEqual(self.fileName, self.gs.to_delete[0], "check that proper file name is kept")
+        self.assertTrue(self.gs.to_delete.__contains__(self.fileName), "check that proper file name is kept")
         self.assertEqual(1, len(self.gs.to_delete), "check that single entry exists")
         self.assertFalse(self.gs.queue_delete(self.fileName + "1"), "check handling of invalid file name")
-        self.assertTrue(self.gs.dequeueDelete(self.fileName), "check for proper return code")
+        self.assertTrue(self.gs.dequeue_delete(self.fileName), "check for proper return code")
         self.assertEqual(0, len(self.gs.to_delete), "check that filemap is empty")
-        self.assertFalse(self.gs.dequeueDelete(self.fileName), "test removing something that is not in the list")
+        self.assertFalse(self.gs.dequeue_delete(self.fileName), "test removing something that is not in the list")
 
     def testGetFile(self):
         self.gs.add_file(self.fileName)
