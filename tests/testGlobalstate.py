@@ -18,9 +18,9 @@ class Test(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testIncrementChunkHandle(self):        
+    def testIncrementChunkHandle(self):
         self.assertEqual(0, self.gs._chunk_handle, "initial chunk handle")
-        self.assertEqual(1, self.gs.increment_and_get_chunk_handle(), "incremented chunk handle")
+        self.assertEqual(1, self.gs.get_next_chunk, "incremented chunk handle")
 
     def testAddFile(self):
         self.assertEqual(0, len(self.gs.file_map), "check that filemap is initially empty")

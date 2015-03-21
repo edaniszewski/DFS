@@ -6,9 +6,29 @@ persist the data to allow for graceful recovery.
 Note that the master does not handle the data associated with a file - only
 the metadata associated with a file (and the chunks any file belongs to).
 
-Created on Aug 13, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
 import os.path
 from random import choice
@@ -27,13 +47,12 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("master_logger")
 
 
-class Master(object, MasterServer):
+class Master(MasterServer):
     """
     Centralized administrator of system metadata. Initiates a global state to
     track the adding and updating of Chunks and Files. Includes (or will include) methods
     to persist global state.
     """
-
     def __init__(self, run=False):
         """
         Constructor
@@ -42,9 +61,8 @@ class Master(object, MasterServer):
         :return:
         """
         super(Master, self).__init__()
-        self.m = Message()
-        self.currentChunk = None
-        self.gs = None
+        self._m = Message()
+        self.gs = GlobalState()
         if not run:
             self.initialize_master()
             self.initialize_heart_beat_listener()
@@ -60,12 +78,11 @@ class Master(object, MasterServer):
 
         self.check_resources()
         self.restore_state()
-        # FIXME: This is only the case for initial start up. Need to also handle the case when the server is reset
-        self.currentChunk = self.get_current_chunk
 
         log.info("Master initialized successfully")
 
-    def initialize_heart_beat_listener(self):
+    @staticmethod
+    def initialize_heart_beat_listener():
         """
         Initialize an instance of the heartbeat listener
 
@@ -113,40 +130,43 @@ class Master(object, MasterServer):
         # ========================================
         #
         # TODO: Implement parsing and delegation
+        # FIXME: Would it make sense to have this in a loop so one connection could
+        # yield multiple actions? Or does a new connection have to be made for every
+        # new action?
         #
-        #========================================
+        # ========================================
 
-        if sysmsg == self.m.APPEND:
+        if sysmsg == self._m.APPEND:
             #self.append(fileName, appendSize)
-            pass
+            log.info("Append received")
 
-        elif sysmsg == self.m.READ:
+        elif sysmsg == self._m.READ:
             #self.read()
-            pass
+            log.info("Read received")
 
-        elif sysmsg == self.m.SANITIZE:
+        elif sysmsg == self._m.SANITIZE:
             #self.sanitize()
-            pass
+            log.info("Sanitize received")
 
-        elif sysmsg == self.m.DELETE:
+        elif sysmsg == self._m.DELETE:
             #self.delete()
-            pass
+            log.info("Delete received")
 
-        elif sysmsg == self.m.UNDELETE:
+        elif sysmsg == self._m.UNDELETE:
             #self.undelete()
-            pass
+            log.info("Undelete received")
 
-        elif sysmsg == self.m.CREATE:
-            pass
+        elif sysmsg == self._m.CREATE:
+            log.info("Create received")
 
-        elif sysmsg == self.m.OPEN:
-            pass
+        elif sysmsg == self._m.OPEN:
+            log.info("Open received")
 
-        elif sysmsg == self.m.CLOSE:
-            pass
+        elif sysmsg == self._m.CLOSE:
+            log.info("Close received")
 
-        elif sysmsg == self.m.WRITE:
-            pass
+        elif sysmsg == self._m.WRITE:
+            log.info("Write received")
 
         else:
             log.warn("Message not recognized.")
@@ -163,24 +183,25 @@ class Master(object, MasterServer):
 
         :rtype : object
         """
-        if self.gs._chunk_handle == 0:
-            self.gs.add_chunk(self.gs.increment_and_get_chunk_handle())
-        return self.gs.get_chunk(self.gs._chunk_handle)
+        if self.gs.get_current_chunk == 0:
+            self.gs.add_chunk(self.gs.get_next_chunk)
+        return self.gs.get_chunk(self.gs.get_current_chunk)
 
-    def state_snapshot(self):
+    def global_state_snapshot(self):
         """
         Take a snapshot of the metadata and persist it to disk
 
         :rtype : object
         """
         # FIXME: Instead of replacing the previous snapshot, could have snapshots be incremental or
-        # timestamped, and persist them in their own directory. This could allow you to return to 
+        # timestamped, and persist them in their own directory. This could allow you to return to
         # a state older than that of the previous snapshot. Since snapshots should be taken somewhat
-        # frequently, it is possible that keeping only the past 10? 100? 1000? would be necessary. 
+        # frequently, it is possible that keeping only the past 10? 100? 1000? would be necessary.
         with open(config.metasnapshot, 'wb') as f:
             pickle.dump(self.gs, f)
 
-    def check_resources(self):
+    @staticmethod
+    def check_resources():
         """
         Check to see if persisted resources exist from previous server instantiations.
         If the resources do not exist, create them. The resources which are checked are:
@@ -200,36 +221,26 @@ class Master(object, MasterServer):
             open(config.oplog, 'w').close()
             log.warn("OPLOG not found. Creating new oplog...")
 
-        if not os.path.isfile(config.metasnapshot):
-            open(config.metasnapshot, 'w').close()
-            log.warn("Snapshot persistence file not found. Creating new snapshot file...")
-
-    def load_global_state(self):
-        """
-        Load in a pickled global state (from meta.snapshot resource)
-
-        :rtype : object
-        """
-        try:
-            return pickle.load(open(config.metasnapshot, 'rb'))
-        except:
-            return GlobalState()
-
-        # If nothing was loaded in, create a new instance of GlobalState
-        #if not state:
-        #    return GlobalState()
-        # Otherwise, return the loaded state
-        #return state
-
     def restore_state(self):
         """
         Restore the master's global state to a previously pickled state. If loading in a
-        pickled state was unsuccessful or there was no pickled snapshot to load in, restore_state()
-        will instantiate a new instance of GlobalState.
+        pickled state was unsuccessful, log the error and create a new instance of global state.
 
         :rtype : object
         """
-        self.gs = self.load_global_state()
+        if os.path.isfile(config.metasnapshot):
+            try:
+                self.gs = pickle.load(open(config.metasnapshot, 'rb'))
+
+            except pickle.UnpickleableError:
+                log.error("Unable to unpickle previously pickled global state. Creating new Global State instance.")
+
+            except Exception as e:
+                log.error("Unable to restore previous global state. Creating new Global State instance.\n{}".format(
+                    e.message))
+                raise e
+        else:
+            self.gs = GlobalState()
 
     def update_current_chunk(self):
         """
@@ -248,17 +259,16 @@ class Master(object, MasterServer):
         :rtype : object
         :param file_name:
         """
-        self.gs.addFile(file_name)
+        self.gs.add_file(file_name)
 
     def create_new_chunk(self):
         """
         On CREATE or APPEND, master will create a new metadata Chunk
         Object to track the new chunk.
 
-        :rtype : object
+        :rtype : None
         """
-        chunk_handle = self.gs.incrementAndGetChunkHandle()
-        self.gs.addChunk(chunk_handle)
+        self.gs.add_chunk(self.gs.get_next_chunk())
 
     def link_chunk_to_file(self, chunk_handle, file_name):
         """
@@ -269,8 +279,7 @@ class Master(object, MasterServer):
         :param chunk_handle:
         :param file_name:
         """
-        f = self.gs.getFile(file_name)
-        f.chunkHandles.append(chunk_handle)
+        self.gs.get_file(file_name).chunk_handles.append(chunk_handle)
 
     def append(self, file_name, append_size):
         """
@@ -280,32 +289,49 @@ class Master(object, MasterServer):
         :param file_name:
         :param append_size:
         """
-        current_chunk = self.currentChunk
-        if current_chunk.offset + append_size < config.chunk_size:
-            self.link_chunk_to_file(current_chunk.chunkHandle(), file_name)
-        else:
-            log.info("Can not append -- not enough space in chunk")
+        try:
+            chunk = self.gs.get_chunk(self.gs.get_file(file_name).chunk_handles[-1])
+            chunk.update_offset(append_size)
+        except:
+            pass
+        finally:
+            self.global_state_snapshot()
 
     def read(self):
         """
 
         :rtype : object
         """
-        pass
+        try:
+            pass
+        except:
+            pass
+        finally:
+            self.global_state_snapshot()
 
     def delete(self):
         """
 
         :rtype : object
         """
-        pass
+        try:
+            pass
+        except:
+            pass
+        finally:
+            self.global_state_snapshot()
 
     def undelete(self):
         """
 
         :rtype : object
         """
-        pass
+        try:
+            pass
+        except:
+            pass
+        finally:
+            self.global_state_snapshot()
 
     def append_lock(self):
         """
@@ -377,7 +403,7 @@ class Master(object, MasterServer):
         """
         Get the current locations that a chunk is stored at
 
-        :rtype : object
+        :rtype : list
         :param chunk_handle:
         """
         return self.gs.chunk_map[chunk_handle].chunkserverLocations
@@ -386,7 +412,7 @@ class Master(object, MasterServer):
         """
         Get the current number of replicas of a specified chunk
 
-        :rtype : object
+        :rtype : int
         :param chunk_handle:
         """
         return len(self.get_chunk_locations(chunk_handle))
@@ -403,7 +429,7 @@ class Master(object, MasterServer):
 
         current_locations = self.get_chunk_locations(chunk_handle)
         num_of_locs = self.number_of_replicas(chunk_handle)
-        # In the case that an appropriate number of replicas exist, 
+        # In the case that an appropriate number of replicas exist,
         if num_of_locs >= config.replica_amount:
             return
         else:
@@ -436,6 +462,7 @@ class Master(object, MasterServer):
         :rtype : object
         """
         pass
+
 
 if __name__ == "__main__":
     master = Master()

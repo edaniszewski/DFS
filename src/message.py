@@ -1,11 +1,31 @@
 """
-A message class to hold system network message constants. Using byte-sized
-constants as communication between various parts of the system results in
-a reduced network load.
+A message class to hold system network message constants. Using small constants
+as communication messages between various parts of the system results in a
+reduced network load.
 
-Created on Oct 31, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
 
 
@@ -13,19 +33,18 @@ class Message(object):
     """
     Message codes for intra-system communications
     """
-
     def __init__(self):
-        self.FAILURE = 0
-        self.SUCCESS = 1
-        self.READ = 2
-        self.APPEND = 3
-        self.DELETE = 4
-        self.UNDELETE = 5
-        self.SANITIZE = 6
-        self.CREATE = 7
-        self.OPEN = 8
-        self.CLOSE = 9
-        self.WRITE = 10
-        self.CONTENTS = 11
-        self.CHUNKSPACE = 12
-        self.HEARTBEAT = 13
+        self.FAILURE = '0'
+        self.SUCCESS = '1'
+        self.READ = '2'
+        self.APPEND = '3'
+        self.DELETE = '4'
+        self.UNDELETE = '5'
+        self.SANITIZE = '6'
+        self.CREATE = '7'
+        self.OPEN = '8'
+        self.CLOSE = '9'
+        self.WRITE = '10'
+        self.CONTENTS = '11'
+        self.CHUNKSPACE = '12'
+        self.HEARTBEAT = '13'

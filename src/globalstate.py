@@ -9,28 +9,78 @@ Global state includes:
     - List of files marked for deletion
     - List of active chunk servers
 
-Created on Aug 13, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
+from threading import Lock
+import logging
+
 from file import File
 from chunk import Chunk
 import config
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("global_state_logger")
+
 
 class GlobalState(object):
     """
-    Contains important global state, including the chunkHandle incrementor
+    Contains important global state, including the chunkHandle incrementer
     """
-
     def __init__(self):
         # FIXME: As per the GFS paper, chunk ids are immutable 64 bit UIDs
+        self.c_lock = Lock()
         self._chunk_handle = 0
         self.to_delete = set()
         self.file_map = {}
         self.chunk_map = {}
         self.hosts = []
         self.active_hosts = []
+
+    @property
+    def get_current_chunk(self):
+        """
+        Gets the current chunk handle value but DOES NOT increment the chunk handle. This function should
+        only be used as a check for the current chunk handle, not as a means to allocate a chunk handle to
+        a new Chunk.
+
+        :return: the current (most recent) chunk handle
+        """
+        return self._chunk_handle
+
+    @property
+    def get_next_chunk(self):
+        """
+        Increments the most current chunk handle and then returns the new chunk handle value. This should
+        NOT be used to check chunk handles, but instead, it should be used to allocate chunk handles for
+        new chunks.
+
+        :return: a new chunk handle
+        """
+        with self.c_lock:
+            self._chunk_handle += 1
+        return self._chunk_handle
 
     def refresh_hosts(self):
         """
@@ -50,23 +100,6 @@ class GlobalState(object):
         with open(config.activehosts, 'r') as f:
             self.active_hosts = f.read().splitlines()
 
-    def increment_chunk_handle(self):
-        """
-        Increments the chunk handle.
-
-        :rtype : object
-        """
-        self._chunk_handle += 1
-
-    def increment_and_get_chunk_handle(self):
-        """
-        Increment the chunk handle and return the new chunk handle
-
-        :rtype : object
-        """
-        self.increment_chunk_handle()
-        return self._chunk_handle
-
     def add_file(self, filename):
         """
         Add a new file object to the file map, keyed to the file name
@@ -78,6 +111,7 @@ class GlobalState(object):
             self.file_map[filename] = File(filename)
             return 1
         else:
+            log.error("Filename '{}' already exists.".format(filename))
             return 0
 
     def queue_delete(self, filename):
@@ -103,21 +137,20 @@ class GlobalState(object):
         try:
             self.to_delete.remove(filename)
             return 1
-        # TODO: Better exception handling
-        except Exception:
+        except KeyError:
             return 0
 
     def get_file(self, filename):
         """
         Get a file object corresponding to a filename string
 
-        :rtype : object
+        :rtype : File
         :param filename:
         """
         try:
             return self.file_map[filename]
-        except Exception:
-            return 0
+        except KeyError:
+            return None
 
     def get_files(self):
         """
@@ -166,13 +199,14 @@ class GlobalState(object):
         """
         Get a chunk object corresponding to a chunkHandle
 
-        :rtype : object
+        :rtype : Chunk
         :param chunk_handle:
         """
         try:
             return self.chunk_map[chunk_handle]
-        except Exception:
-            return 0
+        except KeyError:
+            log.error('Chunk handle {} does not exist in chunk map.'.format(chunk_handle))
+            return None
 
     def get_chunks(self):
         """
@@ -200,5 +234,5 @@ class GlobalState(object):
         """
         try:
             del self.chunk_map[chunk_handle]
-        except Exception:
-            raise RuntimeError('Unable to delete chunk handle from map.')
+        except KeyError:
+            log.error('Unable to delete chunk handle from map.')

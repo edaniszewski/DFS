@@ -4,14 +4,33 @@ storage managers of the system, keeping data (enclosed in chunks) on them. In ad
 to coordinating with the client and managing the chunk data, it also provides certain
 metrics and chunk metadata to the master on request (or will in the future).
 
-Created on Aug 13, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
 import os
 import threading
 import logging
-import struct
 
 import config
 from heartbeat import HeartbeatClient
@@ -23,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("chunkserver_logger")
 
 
-class Chunkserver(object, ChunkServer):
+class Chunkserver(ChunkServer):
     """
     A server that holds the chunks that are the system storage unit. In addition to
     keeping handling the data that is associated with chunks, it provides chunk metadata
@@ -34,10 +53,10 @@ class Chunkserver(object, ChunkServer):
         super(Chunkserver, self).__init__()
         self.check_chunkstore()
         self.heartbeat = HeartbeatClient()
-        self.m = Message()
+        self._m = Message()
         self.chunk_set = set()
-        self.rLock = threading.Lock()
-        self.wLock = threading.Lock()
+        self._rLock = threading.Lock()
+        self._wLock = threading.Lock()
         self.start_heartbeat()
         self.run()
 
@@ -52,9 +71,9 @@ class Chunkserver(object, ChunkServer):
 
         if not os.path.isdir(config.chunkstore):
             os.mkdir(config.chunkstore)
-            log.info("Chunk storage created")
+            log.debug("Chunk storage created")
 
-        log.info("Chunk storage found")
+        log.debug("Chunk storage found")
 
     def start_heartbeat(self):
         """
@@ -64,9 +83,10 @@ class Chunkserver(object, ChunkServer):
         """
         log.info("Starting chunkserver heartbeat")
 
-        t = threading.Thread(target=self.heartbeat.ping_forever())
-        t.daemon = True
-        t.start()
+       # t = threading.Thread(target=self.heartbeat.ping_forever())
+       # t.daemon = True
+       # t.start()
+       # self.threads.add(t)
 
         log.info("Chunkserver heartbeat started.")
 
@@ -105,64 +125,64 @@ class Chunkserver(object, ChunkServer):
         sysmsg = self.recv(sock)
 
         # Request to create a new chunk
-        if sysmsg == self.m.CREATE:
+        if sysmsg == self._m.CREATE:
             chunk_handle = self.recv(sock)
-
+            log.info('creating chunk {}'.format(chunk_handle))
             if not self.create_chunk(chunk_handle):
-                self.send(sock, self.m.FAILURE)
-            self.send(sock, self.m.SUCCESS)
+                self.send(sock, self._m.FAILURE)
+            self.send(sock, self._m.SUCCESS)
 
         # Request to append data to an existing chunk
-        elif sysmsg == self.m.APPEND:
+        elif sysmsg == self._m.APPEND:
             chunk_handle = self.recv(sock)
             data = self.recv(sock)
 
             if not self.append_chunk(chunk_handle, data):
-                self.send(sock, self.m.FAILURE)
-            self.send(sock, self.m.SUCCESS)
+                self.send(sock, self._m.FAILURE)
+            self.send(sock, self._m.SUCCESS)
 
         # Request to permanently delete a chunk from the system
-        elif sysmsg == self.m.DELETE:
+        elif sysmsg == self._m.DELETE:
             chunk_handle = self.recv(sock)
 
             if not self.delete_chunk(chunk_handle):
-                self.send(sock, self.m.FAILURE)
-            self.send(sock, self.m.SUCCESS)
+                self.send(sock, self._m.FAILURE)
+            self.send(sock, self._m.SUCCESS)
 
         # Request to read from a chunk
-        elif sysmsg == self.m.READ:
+        elif sysmsg == self._m.READ:
             chunk_handle = self.recv(sock)
             offset = self.recv(sock)
             size = self.recv(sock)
             data = self.read_chunk(chunk_handle, offset, size)
 
             if not data:
-                self.send(sock, self.m.FAILURE)
+                self.send(sock, self._m.FAILURE)
             self.send(sock, data)
 
         # Request to write to a chunk
-        elif sysmsg == self.m.WRITE:
+        elif sysmsg == self._m.WRITE:
             # data = struct.unpack("!L", self.recv(sock))[0]
             #if not self.write_chunk():
-            #    self.send(sock, self.m.FAILURE)
-            #self.send(sock, self.m.SUCCESS)
+            #    self.send(sock, self._m.FAILURE)
+            #self.send(sock, self._m.SUCCESS)
             pass
 
         # Request for chunks managed by the chunkserver
-        elif sysmsg == self.m.CONTENTS:
+        elif sysmsg == self._m.CONTENTS:
             contents = self.get_contents()
 
             if not contents:
-                self.send(sock, self.m.FAILURE)
+                self.send(sock, self._m.FAILURE)
             self.send(sock, contents)
 
         # Request for the amount of chunkstore space is left on the chunkserver
-        elif sysmsg == self.m.CHUNKSPACE:
+        elif sysmsg == self._m.CHUNKSPACE:
             chunk_handle = self.recv(sock)
             chunk_space = self.get_remaining_chunk_space(chunk_handle)
 
             if not chunk_space:
-                self.send(sock, self.m.FAILURE)
+                self.send(sock, self._m.FAILURE)
             self.send(sock, chunk_space)
 
         else:
@@ -192,7 +212,7 @@ class Chunkserver(object, ChunkServer):
         :param data: 
         """
         try:
-            with self.wLock:
+            with self._wLock:
                 with open(config.chunkstore + str(chunk_handle), 'a') as f:
                     f.write(data)
                 return True
@@ -210,7 +230,7 @@ class Chunkserver(object, ChunkServer):
         :param size:
         """
         try:
-            with self.rLock:
+            with self._rLock:
                 with open(config.chunkstore + str(chunk_handle), 'r') as f:
                     f.seek(offset)
                     data = f.read(size)

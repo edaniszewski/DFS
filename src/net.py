@@ -3,9 +3,29 @@ The net module defines the base classes for the networking capability
 of the master server, the chunk server, and other network-related methods
 used by the system.
 
-Created on Aug 13, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
 import socket
 import logging
@@ -18,7 +38,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("net_logger")
 
 
-class BaseServer:
+class BaseServer(object):
     """
     A class to act as the base server for the ChunkServer and MasterServer classes.
     Contains methods for network send and recieve.
@@ -59,7 +79,7 @@ class BaseServer:
         return data
 
 
-class UDP:
+class UDP(object):
     """
     A UDP socket networking object
     """
@@ -76,6 +96,7 @@ class UDP:
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(config.heartbeat_timeout)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # TODO: this seems weird, need to think about how to define ports/host for heartbeat udp
         s.bind((config.heartbeat_host, config.heartbeat_port))
         return s
@@ -127,6 +148,7 @@ class ChunkServer(BaseServer):
         """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind((self.host, self.port))
             self.sock.listen(10)
         except socket.error, (value, message):
@@ -145,10 +167,11 @@ class MasterServer(BaseServer):
 
     def __init__(self):
         super(MasterServer, self).__init__()
-        self.port = config.PORT
-        self.host = config.HOST
+        self._port = config.PORT
+        self._host = config.HOST
         self.sock = None
         self.threads = set()
+        log.info("INITIALIZED SERVER BASE")
 
     def initialize_socket(self):
         """
@@ -159,7 +182,8 @@ class MasterServer(BaseServer):
         """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.bind((self.host, self.port))
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.bind((self._host, self._port))
             self.sock.listen(10)
         except socket.error, (value, message):
             if self.sock:

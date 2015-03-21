@@ -9,9 +9,29 @@ will mark that ip as inactive.
 The server states tracked by the heartbeat module are used by the Master to delegate
 chunks and files to servers and maintaining a minimum number of replications on active servers.
 
-Created on Aug 13, 2014
+###############################################################################
+The MIT License (MIT)
 
-@author: erickdaniszewski
+Copyright (c) 2014 Erick Daniszewski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###############################################################################
 """
 import socket
 import threading
@@ -115,12 +135,14 @@ class HeartbeatListener(threading.Thread):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.settimeout(config.heartbeat_timeout)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((config.heartbeat_host, config.heartbeat_port))
             self.sock = s
-        except socket.error:
+        except socket.error as e:
             if self.sock:
                 self.sock.close()
             log.error("Could not initialize heartbeat listener socket")
+            raise e
 
     def run(self):
         """
@@ -132,6 +154,7 @@ class HeartbeatListener(threading.Thread):
 
         while True:
             try:
+                # log.debug("Heartbeat Listening... {}".format(time.time()))
                 data, addr = self.sock.recvfrom(8)
                 if data == self.m.HEARTBEAT:
                     self.hbdict[addr[0]] = time.time()
@@ -139,7 +162,7 @@ class HeartbeatListener(threading.Thread):
                 pass
 
 
-class HeartbeatClient(object, UDP):
+class HeartbeatClient(UDP):
     """
     A class each chunkserver will instantiate in order to send heartbeat messages to the
     HeartbeatListener
